@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 135 — Final Exam Tutor</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f8f7f4; --bg2:#ffffff; --bg3:#f2f1ed; --bg4:#e8e6e0;
+  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14); --border3:rgba(0,0,0,0.22);
+  --text:#1a1916; --text2:#4a4744; --text3:#8a8784;
+  --accent:#2563eb; --accent2:#1d4ed8;
+  --accent-bg:rgba(37,99,235,0.07); --accent-border:rgba(37,99,235,0.22);
+  --green:#16a34a; --green-bg:rgba(22,163,74,0.08); --green-border:rgba(22,163,74,0.22);
+  --red:#dc2626; --red-bg:rgba(220,38,38,0.08); --red-border:rgba(220,38,38,0.22);
+  --amber:#d97706; --amber-bg:rgba(217,119,6,0.09); --amber-border:rgba(217,119,6,0.25);
+  --blue:#1d4ed8; --blue-bg:rgba(29,78,216,0.06); --blue-border:rgba(29,78,216,0.18);
+  --teal:#0d9488; --teal-bg:rgba(13,148,136,0.07); --teal-border:rgba(13,148,136,0.2);
+  --purple:#7c3aed; --purple-bg:rgba(124,58,237,0.07); --purple-border:rgba(124,58,237,0.2);
+  --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif; --serif:'Playfair Display',serif;
+  --sidebar:248px; --r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+
+/* LAYOUT */
+.shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-scroll{flex:1;overflow-y:auto;padding-bottom:1rem}
+.sidebar-scroll::-webkit-scrollbar{width:3px}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{padding:11px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);flex-shrink:0;gap:16px}
+.content{flex:1;overflow-y:auto;padding:28px 36px 80px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* SIDEBAR */
+.brand{padding:16px 14px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.brand-name{font-family:var(--serif);font-size:15px;color:var(--text);letter-spacing:-0.01em}
+.brand-name em{font-style:italic;color:var(--accent)}
+.brand-sub{font-size:10px;color:var(--text3);margin-top:2px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.07em}
+.nav-section{padding:10px 12px 3px;font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:12.5px;color:var(--text2);border-left:2px solid transparent;transition:all 0.1s;user-select:none}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:all 0.2s}
+.nav-dot.done{background:var(--green)}
+.nav-dot.going{background:var(--amber)}
+.sidebar-footer{flex-shrink:0;padding:12px 14px;border-top:1px solid var(--border);background:var(--bg2)}
+.cd-box{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--r);padding:10px 12px}
+.cd-label{font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;font-weight:600}
+.cd-time{font-family:var(--mono);font-size:20px;color:var(--text);margin-top:2px;font-weight:500;letter-spacing:0.03em}
+.cd-sub{font-size:10px;color:var(--text3);margin-top:1px}
+
+/* TOPBAR */
+.page-title{font-family:var(--serif);font-size:17px;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.xp-wrap{display:flex;align-items:center;gap:7px}
+.xp-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em}
+.xp-track{width:80px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.xp-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.5s ease}
+.xp-n{font-family:var(--mono);font-size:12px;color:var(--accent);min-width:28px;font-weight:500}
+
+/* SCREENS */
+.screen{display:none;animation:fadeUp 0.18s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* HOME */
+.home-hero{margin-bottom:22px;padding:24px 28px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden}
+.home-hero::after{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(37,99,235,0.07) 0%,transparent 70%);pointer-events:none}
+.home-title{font-family:var(--serif);font-size:28px;font-weight:400;color:var(--text);line-height:1.2;margin-bottom:6px}
+.home-title em{font-style:italic;color:var(--accent)}
+.home-sub{font-size:13.5px;color:var(--text2);line-height:1.7;max-width:580px;margin-bottom:16px}
+.yes-badge{display:inline-flex;align-items:center;gap:8px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:6px;padding:6px 12px;font-size:12px;color:var(--green);font-weight:500;margin-bottom:16px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat-val{font-family:var(--mono);font-size:22px;color:var(--text);font-weight:400}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:3px}
+.topic-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.topic-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all 0.12s;position:relative;overflow:hidden}
+.topic-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border2);transition:background 0.18s}
+.topic-card:hover{border-color:var(--border2);box-shadow:0 2px 8px rgba(0,0,0,0.06);transform:translateY(-1px)}
+.topic-card:hover::before{background:var(--accent)}
+.tc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px;gap:8px}
+.tc-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.3}
+.tc-badge{font-size:10px;padding:2px 8px;border-radius:99px;font-family:var(--mono);white-space:nowrap;flex-shrink:0}
+.b-core{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+.b-light{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)}
+.b-hist{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+.tc-desc{font-size:11.5px;color:var(--text3);line-height:1.55;margin-bottom:8px}
+.tc-bar{height:2px;background:var(--bg4);border-radius:1px;overflow:hidden}
+.tc-fill{height:100%;background:var(--accent);border-radius:1px;transition:width 0.4s ease}
+
+/* LESSON */
+.lesson-wrap{display:grid;grid-template-columns:1fr 330px;gap:22px;max-width:1120px}
+.lesson-main{min-width:0}
+.lesson-side{position:sticky;top:0}
+.ls-heading{font-family:var(--serif);font-size:23px;font-weight:400;color:var(--text);margin-bottom:6px;line-height:1.2}
+.ls-intro{font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:20px;max-width:600px;border-left:3px solid var(--border2);padding-left:12px}
+.sec-label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin:20px 0 9px}
+.sec-label:first-child{margin-top:0}
+
+/* CONCEPT BOXES */
+.concept-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:11px}
+.cc-title{font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
+.cc-title::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.concept-card p,.concept-card li{font-size:13px;color:var(--text2);line-height:1.75}
+.concept-card ul,.concept-card ol{padding-left:16px}
+.concept-card li{margin-bottom:5px}
+
+.info-box{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r);padding:11px 14px;margin-bottom:10px}
+.info-box p{font-size:12.5px;color:var(--blue);line-height:1.7}
+.warn-box{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--r);padding:11px 14px;margin-bottom:10px}
+.warn-box p{font-size:12.5px;color:var(--amber);line-height:1.7}
+.def-box{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:12px 14px;margin-bottom:11px}
+.def-box .def-ttl{font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-family:var(--mono)}
+.def-box p,.def-box li{font-size:13px;color:var(--text2);line-height:1.75}
+.def-box ul{padding-left:16px}
+.def-box li{margin-bottom:4px}
+
+/* CODE */
+.code-block{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;margin-bottom:11px;font-family:var(--mono);font-size:12.5px;color:var(--text);line-height:1.9;white-space:pre;overflow-x:auto}
+.kw{color:#2563eb;font-weight:500} /* keywords: define, cond, local, lambda */
+.fn{color:#0d9488} /* function names */
+.cm{color:#9ca3af;font-style:italic} /* comments */
+.num{color:#d97706} /* numbers */
+.str{color:#16a34a} /* strings */
+.sym{color:#7c3aed} /* symbols */
+.hl{background:rgba(250,204,21,0.3);border-radius:2px} /* highlight */
+code{font-family:var(--mono);background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--teal)}
+
+/* STEP EXAMPLES */
+.example-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.ex-header{padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
+.ex-title{font-size:12px;font-weight:500;color:var(--text);font-family:var(--mono)}
+.ex-controls{display:flex;gap:5px;align-items:center}
+.ex-btn{padding:4px 10px;border:1px solid var(--border2);border-radius:5px;background:var(--bg2);font-size:11px;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all 0.1s}
+.ex-btn:hover{border-color:var(--accent-border);color:var(--accent)}
+.ex-btn:disabled{opacity:0.3;cursor:not-allowed}
+.ex-ctr{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.ex-body{padding:14px 16px;min-height:90px}
+.ex-step{display:none}
+.ex-step.visible{display:block;animation:fadeUp 0.15s ease}
+.ex-math{font-family:var(--mono);font-size:12.5px;color:var(--text);line-height:1.9;white-space:pre;overflow-x:auto;background:var(--bg3);border-radius:6px;padding:10px 13px;margin-bottom:8px;border:1px solid var(--border)}
+.ex-explain{font-size:13px;color:var(--text2);line-height:1.7;padding:8px 12px;background:var(--blue-bg);border-radius:6px;border:1px solid var(--blue-border)}
+.ex-progress{display:flex;gap:4px;padding:9px 14px;border-top:1px solid var(--border);background:var(--bg3)}
+.ex-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);cursor:pointer;transition:all 0.12s}
+.ex-dot.active{background:var(--accent)}
+.ex-dot.done{background:var(--green)}
+
+/* QUIZ */
+.quiz-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.quiz-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg3);flex-wrap:wrap}
+.qtab{padding:8px 13px;font-size:11px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.1s;font-family:var(--mono)}
+.qtab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg2)}
+.quiz-pane{display:none;padding:16px}
+.quiz-pane.active{display:block}
+.q-num{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:10px}
+.q-text{font-size:13px;color:var(--text);line-height:1.75;margin-bottom:12px}
+.q-code{font-family:var(--mono);font-size:12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:9px 12px;margin-bottom:12px;white-space:pre;overflow-x:auto;line-height:1.9;color:var(--text)}
+.options{display:flex;flex-direction:column;gap:6px;margin-bottom:11px}
+.opt{padding:9px 13px;border:1px solid var(--border2);border-radius:7px;background:var(--bg3);font-size:13px;color:var(--text2);cursor:pointer;text-align:left;font-family:var(--sans);transition:all 0.1s;line-height:1.5}
+.opt:hover:not([disabled]){border-color:var(--accent-border);background:var(--accent-bg);color:var(--text)}
+.opt.correct{background:var(--green-bg);border-color:var(--green-border);color:var(--green);font-weight:500}
+.opt.wrong{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+.opt[disabled]{cursor:not-allowed}
+.feedback{padding:10px 13px;border-radius:7px;font-size:12.5px;line-height:1.7;display:none;margin-bottom:11px}
+.feedback.show{display:block}
+.feedback.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.feedback.no{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.q-nav{display:flex;gap:7px;margin-top:4px}
+.q-nav-btn{padding:5px 13px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all 0.1s}
+.q-nav-btn:hover{border-color:var(--accent-border);color:var(--accent)}
+.q-nav-btn:disabled{opacity:0.3;cursor:not-allowed}
+
+/* WRITTEN */
+.written-area{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--text);resize:vertical;min-height:80px;outline:none;transition:border-color 0.12s;line-height:1.8}
+.written-area:focus{border-color:var(--accent-border);background:var(--bg2)}
+.reveal-btn{margin-top:8px;padding:7px 14px;border:1px solid var(--accent-border);border-radius:6px;background:var(--accent-bg);font-size:12px;color:var(--accent);cursor:pointer;font-family:var(--mono);transition:all 0.12s;font-weight:500}
+.reveal-btn:hover{background:var(--accent);color:#fff}
+.ans-reveal{display:none;margin-top:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;font-family:var(--mono);font-size:12px;color:var(--text);line-height:1.85;white-space:pre-wrap;overflow-x:auto}
+.ans-reveal.show{display:block;animation:fadeUp 0.18s ease}
+
+/* NAV BUTTONS */
+.back-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);font-size:12px;color:var(--text3);cursor:pointer;font-family:var(--mono);transition:all 0.1s;margin-bottom:18px}
+.back-btn:hover{border-color:var(--accent-border);color:var(--accent)}
+
+/* PLAN */
+.plan-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:920px}
+.plan-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.plan-time{font-family:var(--mono);font-size:10.5px;color:var(--accent);margin-bottom:5px;font-weight:500}
+.plan-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px}
+.plan-items{list-style:none;padding:0}
+.plan-items li{font-size:12px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:7px}
+.plan-items li:last-child{border-bottom:none;padding-bottom:0}
+.plan-items li::before{content:'→';color:var(--accent);font-family:var(--mono);flex-shrink:0;margin-top:1px}
+
+/* CHEAT SHEET */
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:1100px}
+.cheat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px}
+.cheat-card h4{font-family:var(--mono);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:9px;font-weight:600}
+.cheat-code{font-family:var(--mono);font-size:11px;color:var(--text);background:var(--bg3);border-radius:5px;padding:8px 10px;margin-bottom:5px;white-space:pre;overflow-x:auto;border:1px solid var(--border);line-height:1.85}
+.cheat-card p{font-size:11.5px;color:var(--text2);line-height:1.6;margin-bottom:4px}
+
+/* EXAM */
+.exam-wrap{max-width:780px}
+.exam-intro p{font-size:13px;color:var(--text2);line-height:1.75;margin-bottom:12px}
+.start-btn{padding:10px 22px;border:none;border-radius:7px;background:var(--accent);color:#fff;font-size:14px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:all 0.12s;margin-top:6px}
+.start-btn:hover{background:var(--accent2)}
+.exam-q-num{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.08em}
+.exam-q-text{font-size:14px;color:var(--text);line-height:1.75;margin-bottom:14px;white-space:pre-wrap}
+.exam-score{font-family:var(--serif);font-size:48px;color:var(--accent);text-align:center;margin:18px 0 6px}
+.exam-score-sub{text-align:center;color:var(--text2);font-size:14px;margin-bottom:18px}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand-name">CS 135 — <em>Final Tutor</em></div>
+    <div class="brand-sub">0 → 75+  ·  8 hours</div>
+  </div>
+  <div class="sidebar-scroll">
+    <div class="nav-section">Navigate</div>
+    <div class="nav-item active" onclick="goScreen('home')"><span class="nav-dot going" id="nd-home"></span>Dashboard</div>
+    <div class="nav-item" onclick="goScreen('plan')"><span class="nav-dot" id="nd-plan"></span>8-Hour Schedule</div>
+    <div class="nav-item" onclick="goScreen('cheat')"><span class="nav-dot" id="nd-cheat"></span>Cheat Sheet</div>
+
+    <div class="nav-section">Lessons (L13–L22)</div>
+    <div class="nav-item" onclick="goLesson('bintrees')"><span class="nav-dot" id="nd-bintrees"></span>L13: Binary Trees &amp; BSTs</div>
+    <div class="nav-item" onclick="goLesson('genrec')"><span class="nav-dot" id="nd-genrec"></span>L14: General Recursion</div>
+    <div class="nav-item" onclick="goLesson('gentrees')"><span class="nav-dot" id="nd-gentrees"></span>L15: General Trees</div>
+    <div class="nav-item" onclick="goLesson('local')"><span class="nav-dot" id="nd-local"></span>L16: Local Expressions</div>
+    <div class="nav-item" onclick="goLesson('lambda')"><span class="nav-dot" id="nd-lambda"></span>L17: Lambda &amp; First-Class Fns</div>
+    <div class="nav-item" onclick="goLesson('hof')"><span class="nav-dot" id="nd-hof"></span>L18: Higher-Order Functions</div>
+    <div class="nav-item" onclick="goLesson('absfns')"><span class="nav-dot" id="nd-absfns"></span>L19: Abstract List Functions</div>
+    <div class="nav-item" onclick="goLesson('graphs')"><span class="nav-dot" id="nd-graphs"></span>L20: Directed Graphs</div>
+    <div class="nav-item" onclick="goLesson('random')"><span class="nav-dot" id="nd-random"></span>L21: Randomness</div>
+    <div class="nav-item" onclick="goLesson('history')"><span class="nav-dot" id="nd-history"></span>L22: History of CS</div>
+
+    <div class="nav-section">Practice</div>
+    <div class="nav-item" onclick="goScreen('exam')"><span class="nav-dot" id="nd-exam"></span>Practice Final Exam</div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="cd-box">
+      <div class="cd-label">Time to Final</div>
+      <div class="cd-time" id="cd">--:--:--</div>
+      <div class="cd-sub">Final at 7:00 PM today</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pg-title">Dashboard</div>
+    <div class="topbar-right">
+      <div class="xp-wrap">
+        <span class="xp-lbl">XP</span>
+        <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+        <span class="xp-n" id="xp-n">0</span>
+      </div>
+    </div>
+  </div>
+  <div class="content" id="content">
+
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="home-hero">
+        <div class="home-title">It is 1am.<br>Your final is at <em>7pm.</em></div>
+        <div class="home-sub">You know nothing right now. That is fine. You have 8 focused hours and every CS 135 topic is here — explained from scratch with worked examples, step-by-step traces, and practice questions pulled directly from your lectures and racketprep.com patterns. Follow the plan. Get the 75.</div>
+        <div class="yes-badge">✓ Yes — 75+ is absolutely achievable from zero in 8 hours. CS 135 finals are pattern-based. Learn the patterns, pass the exam.</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val">10</div><div class="stat-lbl">Lessons (L13–L22)</div></div>
+        <div class="stat-card"><div class="stat-val">60+</div><div class="stat-lbl">Practice questions</div></div>
+        <div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">Exam questions</div></div>
+        <div class="stat-card"><div class="stat-val" id="xp-home">0</div><div class="stat-lbl">XP earned</div></div>
+      </div>
+      <div class="sec-label">Click a topic to start learning — follow the 8-hour schedule</div>
+      <div class="topic-grid">
+        <div class="topic-card" onclick="goLesson('bintrees')">
+          <div class="tc-top"><span class="tc-name">Binary Trees &amp; BSTs</span><span class="tc-badge b-core">L13 HIGH</span></div>
+          <div class="tc-desc">Data definitions, helper functions, tree recursion template, BST ordering property, O(log n) search.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-bintrees" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('genrec')">
+          <div class="tc-top"><span class="tc-name">General Recursion &amp; Accumulators</span><span class="tc-badge b-core">L14 HIGH</span></div>
+          <div class="tc-desc">Accumulators, tail recursion, mutual recursion, termination arguments. Rev with acc, sum with acc.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-genrec" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('gentrees')">
+          <div class="tc-top"><span class="tc-name">General Trees &amp; Expression Trees</span><span class="tc-badge b-core">L15 HIGH</span></div>
+          <div class="tc-desc">NTree data def, mutual recursion on trees, expression trees, eval/apply pattern.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-gentrees" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('local')">
+          <div class="tc-top"><span class="tc-name">Local Expressions</span><span class="tc-badge b-core">L16 HIGH</span></div>
+          <div class="tc-desc">Scoped definitions. 4 benefits: clarity, encapsulation, scope reuse, efficiency. Avoiding recomputation.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-local" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('lambda')">
+          <div class="tc-top"><span class="tc-name">Lambda &amp; First-Class Functions</span><span class="tc-badge b-core">L17 HIGH</span></div>
+          <div class="tc-desc">Anonymous functions, beta-reduction, closures, functions producing functions, curry/uncurry.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-lambda" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('hof')">
+          <div class="tc-top"><span class="tc-name">Higher-Order Functions</span><span class="tc-badge b-core">L18 HIGH</span></div>
+          <div class="tc-desc">HOF contracts, lists of functions, compose, apply-twice. Functions as values in all positions.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-hof" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('absfns')">
+          <div class="tc-top"><span class="tc-name">Abstract List Functions</span><span class="tc-badge b-core">L19 HIGH</span></div>
+          <div class="tc-desc">filter, map, foldr, foldl, build-list. Without-recursion problems. Combining multiple functions.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-absfns" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('graphs')">
+          <div class="tc-top"><span class="tc-name">Directed Graphs &amp; Backtracking</span><span class="tc-badge b-core">L20 HIGH</span></div>
+          <div class="tc-desc">Adjacency lists, find-path on DAGs, backtracking, cycle-handling with visited accumulator.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-graphs" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('random')">
+          <div class="tc-top"><span class="tc-name">Randomness</span><span class="tc-badge b-light">L21 LOW</span></div>
+          <div class="tc-desc">True vs pseudorandom, PRNG concept, random in Racket, middle-square method. Mostly conceptual.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-random" style="width:0%"></div></div>
+        </div>
+        <div class="topic-card" onclick="goLesson('history')">
+          <div class="tc-top"><span class="tc-name">History of Computing</span><span class="tc-badge b-hist">L22 FREE</span></div>
+          <div class="tc-desc">Al-Khwarizmi, Godel, Church, Turing, McCarthy, Hopper, Lovelace. ~9 free marks on every final.</div>
+          <div class="tc-bar"><div class="tc-fill" id="bar-history" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAN -->
+    <div class="screen" id="screen-plan">
+      <div class="ls-heading">8-Hour Study Plan</div>
+      <div class="ls-intro">Wake up 9am. Final 7pm. 8 hours of focused work. Every block below is timed. Do not skip. History at the end is 30 minutes for roughly 9 free marks — do not skip it.</div>
+      <div class="plan-grid">
+        <div class="plan-block">
+          <div class="plan-time">9:00 – 10:00 AM (1 hr)</div>
+          <div class="plan-title">Binary Trees + BSTs (L13)</div>
+          <ul class="plan-items">
+            <li>Read the Binary Trees lesson completely</li>
+            <li>Memorize: mk-node, get-label, get-left, get-right</li>
+            <li>Write bt-contains? from scratch without looking</li>
+            <li>Understand BST property: left &lt; root &lt; right</li>
+            <li>Write bst-contains? — trace it on the example tree</li>
+            <li>Do all quiz questions before moving on</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">10:00 – 10:45 AM (45 min)</div>
+          <div class="plan-title">General Trees + Expression Trees (L15)</div>
+          <ul class="plan-items">
+            <li>Read General Trees lesson</li>
+            <li>Understand NTree data def: number OR (cons NTree (listof NTree))</li>
+            <li>Trace the mutual recursion template for NTree</li>
+            <li>Understand expression trees: operator at root, operands as children</li>
+            <li>Write eval for expression trees</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">10:45 – 11:30 AM (45 min)</div>
+          <div class="plan-title">General Recursion + Accumulators (L14)</div>
+          <ul class="plan-items">
+            <li>Read General Recursion lesson</li>
+            <li>Understand: accumulator = work done so far</li>
+            <li>Write rev using accumulator from scratch</li>
+            <li>Write sum using accumulator</li>
+            <li>Mutual recursion: my-even and my-odd</li>
+            <li>Termination: what decreases? what is the lower bound?</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">11:30 AM – 12:15 PM (45 min)</div>
+          <div class="plan-title">Local Expressions (L16)</div>
+          <ul class="plan-items">
+            <li>Read Local lesson</li>
+            <li>Know the 4 benefits cold</li>
+            <li>Practice: rewrite heron using local</li>
+            <li>Practice: encapsulate rev/acc inside rev using local</li>
+            <li>Scope: what is visible where?</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">12:15 – 2:00 PM (1h 45min)</div>
+          <div class="plan-title">Lambda + Higher-Order Functions (L17–L18)</div>
+          <ul class="plan-items">
+            <li>Read Lambda lesson — this is the biggest topic</li>
+            <li>Master beta-reduction: practice 5 examples by hand</li>
+            <li>Closures: make-adder, make-multiplier</li>
+            <li>curry and uncurry: write from scratch, trace</li>
+            <li>compose: write it, trace (compose f g) x</li>
+            <li>Lists of functions: (map (lambda (f) (f 5)) list-of-fns)</li>
+            <li>Do ALL quiz questions — these are the hardest</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">2:00 – 3:45 PM (1h 45min)</div>
+          <div class="plan-title">Abstract List Functions (L19)</div>
+          <ul class="plan-items">
+            <li>Read Abstract List lesson</li>
+            <li>Master all 5 functions and their contracts</li>
+            <li>foldr trace: (foldr + 0 (list 1 2 3)) step by step</li>
+            <li>foldl vs foldr with cons: know the difference cold</li>
+            <li>Implement my-map and my-filter using foldr</li>
+            <li>Combine 2+ functions for without-recursion problems</li>
+            <li>Do ALL quiz questions twice if needed</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">3:45 – 5:00 PM (1h 15min)</div>
+          <div class="plan-title">Directed Graphs + Backtracking (L20)</div>
+          <ul class="plan-items">
+            <li>Read Graphs lesson</li>
+            <li>Draw a graph from an adjacency list</li>
+            <li>Trace find-path on a DAG by hand</li>
+            <li>Understand backtracking: try, fail, back up, try next</li>
+            <li>Add visited accumulator for cycle-handling</li>
+            <li>Do all quiz questions</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">5:00 – 5:30 PM (30 min)</div>
+          <div class="plan-title">History + Randomness (L21–L22)</div>
+          <ul class="plan-items">
+            <li>Read History lesson — memorize the 8 key people</li>
+            <li>Read Randomness lesson — mostly conceptual</li>
+            <li>Do ALL history quiz questions — free marks!</li>
+            <li>Al-Khwarizmi, Church, Turing, McCarthy, Hopper, Lovelace</li>
+          </ul>
+        </div>
+        <div class="plan-block">
+          <div class="plan-time">5:30 – 6:45 PM (1h 15min)</div>
+          <div class="plan-title">Practice Final Exam</div>
+          <ul class="plan-items">
+            <li>Take the full 12-question practice exam here</li>
+            <li>No looking things up — simulate real conditions</li>
+            <li>After each answer, read the solution carefully</li>
+            <li>Re-read any lesson you struggled on</li>
+            <li>Leave by 6:45 — walk to exam, breathe</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHEAT SHEET -->
+    <div class="screen" id="screen-cheat">
+      <div class="ls-heading">Quick Reference Cheat Sheet</div>
+      <div class="ls-intro">Every key pattern on one page. Read this before walking into the exam.</div>
+      <div class="cheat-grid">
+        <div class="cheat-card"><h4>Binary Tree</h4>
+<div class="cheat-code">;; BT is one of: empty | (list Nat BT BT)
+(define (mk-node l lf r) (list l lf r))
+(define (get-label t) (first t))
+(define (get-left t)  (second t))
+(define (get-right t) (third t))
+
+;; Template:
+(define (fn-bt t)
+  (cond [(empty? t) ...]
+        [else (... (get-label t)
+                   (fn-bt (get-left t))
+                   (fn-bt (get-right t)))]))
+</div></div>
+        <div class="cheat-card"><h4>BST Search</h4>
+<div class="cheat-code">(define (bst-contains? n bst)
+  (cond [(empty? bst) false]
+        [(= (get-label bst) n) true]
+        [(> (get-label bst) n)
+         (bst-contains? n (get-left bst))]
+        [else
+         (bst-contains? n (get-right bst))]))
+
+;; BST property:
+;; label > ALL labels in left subtree
+;; label < ALL labels in right subtree
+;; O(log n) on balanced tree
+</div></div>
+        <div class="cheat-card"><h4>NTree (General Tree)</h4>
+<div class="cheat-code">;; NTree is one of:
+;;   Num   OR
+;;   (cons NTree (listof NTree))
+
+(define (fn-ntree nt)
+  (cond [(number? nt) ...]         ; leaf
+        [(empty? (rest nt))
+         (... (fn-ntree (first nt)))]
+        [else
+         (... (fn-ntree (first nt))
+              (fn-ntree (rest nt)))]))
+</div></div>
+        <div class="cheat-card"><h4>Lambda + Beta Reduction</h4>
+<div class="cheat-code">;; Two equivalent definitions:
+(define (f x) (+ x 2))
+(define f (lambda (x) (+ x 2)))
+
+;; Beta-reduction: substitute x with arg
+((lambda (x) (* x x)) 5)
+=> (* 5 5) => 25
+
+;; Closure: lambda captures outer vars
+(define (make-adder n)
+  (lambda (x) (+ x n)))
+(define add3 (make-adder 3))
+(add3 10) => 13
+</div></div>
+        <div class="cheat-card"><h4>Curry / Uncurry</h4>
+<div class="cheat-code">(define (curry f)
+  (lambda (x)
+    (lambda (y)
+      (f x y))))
+
+(define (uncurry f)
+  (lambda (x y) ((f x) y)))
+
+;; Usage:
+(((curry +) 3) 4)    ; => 7
+(((curry cons) 0) '(1 2 3)) ; => '(0 1 2 3)
+</div></div>
+        <div class="cheat-card"><h4>Accumulator Pattern</h4>
+<div class="cheat-code">(define (rev lst)
+  (local
+    [(define (rev/acc lst acc)
+       (cond [(empty? lst) acc]
+             [else (rev/acc
+                     (rest lst)
+                     (cons (first lst) acc))]))]
+    (rev/acc lst empty)))
+; acc = "elements seen so far, reversed"
+; Start with acc = empty
+; Base case returns acc
+</div></div>
+        <div class="cheat-card"><h4>filter / map</h4>
+<div class="cheat-code">;; filter: (X->Bool) (listof X) -> (listof X)
+(filter even? '(1 2 3 4 5 6))
+; => '(2 4 6)
+
+;; map: (X->Y) (listof X) -> (listof Y)
+(map sqr '(1 2 3 4))
+; => '(1 4 9 16)
+
+(map (lambda (x) (* x 2)) '(1 2 3))
+; => '(2 4 6)
+</div></div>
+        <div class="cheat-card"><h4>foldr / foldl</h4>
+<div class="cheat-code">;; foldr: RIGHT to LEFT
+;; (foldr f b '(x1 x2 x3))
+;; = (f x1 (f x2 (f x3 b)))
+(foldr + 0 '(1 2 3))  ; => 6
+(foldr cons '() '(1 2 3)) ; => '(1 2 3)
+
+;; foldl: LEFT to RIGHT — reverses cons!
+;; (foldl f b '(x1 x2 x3))
+;; = (f x3 (f x2 (f x1 b)))
+(foldl cons '() '(1 2 3)) ; => '(3 2 1)
+</div></div>
+        <div class="cheat-card"><h4>build-list</h4>
+<div class="cheat-code">;; build-list n f
+;; = (list (f 0) (f 1) ... (f (n-1)))
+(build-list 4 identity)   ; => '(0 1 2 3)
+(build-list 5 sqr)        ; => '(0 1 4 9 16)
+(build-list 4 even?)      ; => '(T F T F)
+(build-list 3 (lambda (i) (* i 2)))
+; => '(0 2 4)
+</div></div>
+        <div class="cheat-card"><h4>Local Expression</h4>
+<div class="cheat-code">(local
+  [(define x 5)
+   (define (f n) (+ n x))]
+  (f 3))  ; => 8
+; x and f are invisible OUTSIDE the local
+
+;; 4 benefits: clarity, encapsulation,
+;; scope-reuse, efficiency (compute once)
+(define (heron a b c)
+  (local [(define s (/ (+ a b c) 2))]
+    (sqrt (* s (- s a) (- s b) (- s c)))))
+</div></div>
+        <div class="cheat-card"><h4>Graph + find-path</h4>
+<div class="cheat-code">(define g '((A (B C)) (B (D)) (C ()) (D ())))
+(define (neighbours nd g) (second (assoc nd g)))
+
+(define (find-path orig dest g)
+  (cond
+    [(symbol=? orig dest) (list dest)]
+    [else
+     (local [(define p
+               (fp-list (neighbours orig g) dest g))]
+       (cond [(empty? p) empty]
+             [else (cons orig p)]))]))
+</div></div>
+        <div class="cheat-card"><h4>History Quick Facts</h4>
+<div class="cheat-code">Al-Khwarizmi → "algorithm"
+Alonzo Church  → lambda calculus (1930s)
+Alan Turing    → halting problem + Turing machine
+John McCarthy  → Lisp (1958, from lambda calc)
+Grace Hopper   → COBOL + first compiler
+Kurt Godel     → incompleteness theorems
+Ada Lovelace   → first programmer (Babbage)
+Church-Turing  → all models equivalent
+Lisp → Scheme → Racket (lineage)
+</div></div>
+      </div>
+    </div>
+
+    <!-- LESSON -->
+    <div class="screen" id="screen-lesson">
+      <div id="lesson-body"></div>
+    </div>
+
+    <!-- EXAM -->
+    <div class="screen" id="screen-exam">
+      <div id="exam-body"></div>
+    </div>
+
+  </div>
+</div>
+</div>
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+var xp = 0;
+var answered = {};
+var exSteps = {};
+var curLesson = null;
+
+function addXP(n) {
+  xp += n;
+  document.getElementById('xp-n').textContent = xp;
+  document.getElementById('xp-home').textContent = xp;
+  document.getElementById('xp-fill').style.width = Math.min(100, xp / 6) + '%';
+}
+
+// ── COUNTDOWN ──────────────────────────────────────────────────────────────
+function tick() {
+  var now = new Date();
+  var fin = new Date();
+  fin.setHours(19, 0, 0, 0);
+  if (fin < now) fin.setDate(fin.getDate() + 1);
+  var d = fin - now;
+  if (d <= 0) { document.getElementById('cd').textContent = 'GO TIME!'; return; }
+  var h = Math.floor(d / 3600000);
+  var m = Math.floor((d % 3600000) / 60000);
+  var s = Math.floor((d % 60000) / 1000);
+  document.getElementById('cd').textContent =
+    pad(h) + ':' + pad(m) + ':' + pad(s);
+}
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+setInterval(tick, 1000);
+tick();
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+var screenTitles = {
+  home: 'Dashboard', plan: '8-Hour Study Plan',
+  cheat: 'Cheat Sheet', lesson: '', exam: 'Practice Final Exam'
+};
+
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.getElementById('pg-title').textContent = screenTitles[id] || id;
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  if (id === 'exam') { buildExam(); }
+}
+
+function goLesson(id) {
+  curLesson = id;
+  renderLesson(id);
+  goScreen('lesson');
+  document.getElementById('pg-title').textContent = LESSONS[id] ? LESSONS[id].title : id;
+}
+
+// ── LESSONS DATA ───────────────────────────────────────────────────────────
+
+var LESSONS = {};
+
+LESSONS['bintrees'] = {
+  title: 'L13: Binary Trees and Binary Search Trees',
+  intro: 'A binary tree is a recursive data structure where every node has a label and at most two children — a left subtree and a right subtree. Both children are themselves binary trees (or empty). A Binary Search Tree (BST) adds an ordering rule that makes searching take O(log n) time instead of O(n). Every function on a binary tree mirrors its recursive data definition.',
+  concepts: [
+    {
+      title: 'Binary Tree Data Definition',
+      body: '<span class="cm">;; A binary tree (BT) is one of:</span>\n<span class="cm">;; * empty                           (base case)</span>\n<span class="cm">;; * (list Nat BT BT)                (recursive case)</span>\n<span class="cm">;;   where first = label, second = left subtree, third = right subtree</span>\n\n<span class="cm">;; We always use these helper functions — never access raw list positions!</span>\n(<span class="kw">define</span> (<span class="fn">mk-node</span> label left right) (<span class="fn">list</span> label left right))\n(<span class="kw">define</span> (<span class="fn">get-label</span> t) (<span class="fn">first</span> t))\n(<span class="kw">define</span> (<span class="fn">get-left</span> t)  (<span class="fn">second</span> t))\n(<span class="kw">define</span> (<span class="fn">get-right</span> t) (<span class="fn">third</span> t))\n\n<span class="cm">;; Example: tree with root 5, left child 1, right child 6</span>\n(<span class="kw">define</span> example-bt\n  (<span class="fn">mk-node</span> <span class="num">5</span>\n    (<span class="fn">mk-node</span> <span class="num">1</span> empty empty)\n    (<span class="fn">mk-node</span> <span class="num">6</span> empty (<span class="fn">mk-node</span> <span class="num">14</span> empty empty))))\n\n<span class="cm">;;     5</span>\n<span class="cm">;;    / \\</span>\n<span class="cm">;;   1   6</span>\n<span class="cm">;;        \\</span>\n<span class="cm">;;        14</span>'
+    },
+    {
+      title: 'The Recursion Template for Binary Trees',
+      body: 'Every single function on binary trees follows this template. Memorize it.\n\n(<span class="kw">define</span> (<span class="fn">fn-on-bt</span> tree)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> tree) ...]              <span class="cm">; base case: empty tree</span>\n        [<span class="kw">else</span> (... (<span class="fn">get-label</span> tree)           <span class="cm">; use the label</span>\n                   (<span class="fn">fn-on-bt</span> (<span class="fn">get-left</span> tree))   <span class="cm">; recurse LEFT</span>\n                   (<span class="fn">fn-on-bt</span> (<span class="fn">get-right</span> tree)))]))  <span class="cm">; recurse RIGHT</span>\n\n<span class="cm">;; Count nodes in a tree</span>\n(<span class="kw">define</span> (<span class="fn">bt-count</span> tree)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> tree) <span class="num">0</span>]\n        [<span class="kw">else</span> (+ <span class="num">1</span> (<span class="fn">bt-count</span> (<span class="fn">get-left</span> tree))\n                    (<span class="fn">bt-count</span> (<span class="fn">get-right</span> tree)))]))  <span class="cm">; 1 + left + right</span>\n\n<span class="cm">;; Sum all labels in a tree</span>\n(<span class="kw">define</span> (<span class="fn">bt-sum</span> tree)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> tree) <span class="num">0</span>]\n        [<span class="kw">else</span> (+ (<span class="fn">get-label</span> tree)\n                 (<span class="fn">bt-sum</span> (<span class="fn">get-left</span> tree))\n                 (<span class="fn">bt-sum</span> (<span class="fn">get-right</span> tree)))]))  <span class="cm">; label + sum-left + sum-right</span>'
+    },
+    {
+      title: 'Searching a Plain Binary Tree (O(n))',
+      body: 'Without any ordering, we must check EVERY node in the worst case.\n\n(<span class="kw">define</span> (<span class="fn">bt-contains?</span> n tree)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> tree) <span class="num">false</span>]           <span class="cm">; not found in empty tree</span>\n        [(= (<span class="fn">get-label</span> tree) n) <span class="num">true</span>]     <span class="cm">; found at root!</span>\n        [<span class="kw">else</span> (<span class="fn">or</span> (<span class="fn">bt-contains?</span> n (<span class="fn">get-left</span> tree))   <span class="cm">; check left</span>\n                   (<span class="fn">bt-contains?</span> n (<span class="fn">get-right</span> tree)))]))  <span class="cm">; check right</span>\n\n<span class="cm">;; For a tree with n nodes, worst case: check all n nodes. O(n).</span>\n<span class="cm">;; The or is short-circuit: if left subtree finds it, we skip right.</span>'
+    },
+    {
+      title: 'The BST Ordering Property',
+      body: 'A Binary Search Tree (BST) has ONE extra rule on top of a regular binary tree:\n\nFor EVERY node in the tree:\n  - The label is GREATER THAN every label in the LEFT subtree\n  - The label is LESS THAN every label in the RIGHT subtree\n\nThis must hold RECURSIVELY at every level, not just at the root.\n\n<span class="cm">;;     5          Valid BST:</span>\n<span class="cm">;;    / \\         left(5) = {1}  → all < 5  ✓</span>\n<span class="cm">;;   1   6        right(5) = {6,14} → all > 5 ✓</span>\n<span class="cm">;;        \\        right(6) = {14} → all > 6  ✓</span>\n<span class="cm">;;        14</span>\n\nConsequence: all values smaller than the root are in the left subtree. All values larger are in the right. So when searching for a value, we can immediately discard half the tree at each step!'
+    },
+    {
+      title: 'BST Search — O(log n)',
+      body: '(<span class="kw">define</span> (<span class="fn">bst-contains?</span> n bst)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> bst) <span class="num">false</span>]             <span class="cm">; not here</span>\n        [(= (<span class="fn">get-label</span> bst) n) <span class="num">true</span>]       <span class="cm">; found!</span>\n        [(> (<span class="fn">get-label</span> bst) n)              <span class="cm">; root is TOO BIG</span>\n         (<span class="fn">bst-contains?</span> n (<span class="fn">get-left</span> bst))]  <span class="cm">; n must be in left</span>\n        [<span class="kw">else</span>                                <span class="cm">; root is TOO SMALL</span>\n         (<span class="fn">bst-contains?</span> n (<span class="fn">get-right</span> bst))]))  <span class="cm">; n must be in right</span>\n\n<span class="cm">;; Example: search for 8 in the example BST (root=5)</span>\n<span class="cm">;; Step 1: 5 < 8 → go RIGHT (to 6)</span>\n<span class="cm">;; Step 2: 6 < 8 → go RIGHT (to 14)</span>\n<span class="cm">;; Step 3: 14 > 8 → go LEFT (to empty)</span>\n<span class="cm">;; Step 4: empty → return false</span>\n<span class="cm">;; We NEVER checked the left subtree of 5 (node 1)!</span>\n<span class="cm">;; On a balanced BST: O(log n). On a degenerate BST (like a list): O(n).</span>'
+    }
+  ],
+  examples: [
+    {
+      title: 'BST search trace: find 6',
+      steps: [
+        { math: '     5\n    / \\\n   1   6\n        \\\n        14\n\n(bst-contains? 6 example-bst)', explain: 'We want to find 6 in this BST. Start at the root (label = 5).' },
+        { math: 'root = 5, n = 6\n5 = 6? No.\n5 > 6? No. (5 is not bigger than 6)\nSo: go RIGHT.', explain: 'The root (5) is smaller than what we want (6). So 6 must be in the RIGHT subtree. We eliminate the entire left subtree (node 1) without checking it.' },
+        { math: '(bst-contains? 6 right-subtree-of-5)\nroot = 6, n = 6\n6 = 6? YES! -> return true', explain: 'The root of the right subtree is 6. We found it! Return true. Total nodes checked: 2 out of 4. That is the power of BST search.' }
+      ]
+    },
+    {
+      title: 'bt-count trace on a 3-node tree',
+      steps: [
+        { math: '(bt-count (mk-node 5 (mk-node 3 empty empty)\n                       (mk-node 7 empty empty)))', explain: 'Count nodes in a tree: root=5, left=3, right=7. The template says: 1 + bt-count(left) + bt-count(right).' },
+        { math: '(+ 1 (bt-count (mk-node 3 empty empty))\n      (bt-count (mk-node 7 empty empty)))', explain: 'Expand the else branch. We have 1 (for the root) plus the counts of both subtrees.' },
+        { math: '(bt-count (mk-node 3 empty empty))\n=> (+ 1 (bt-count empty) (bt-count empty))\n=> (+ 1 0 0) => 1', explain: 'The left subtree has just node 3 with empty children. empty returns 0. So it contributes 1.' },
+        { math: '(bt-count (mk-node 7 empty empty)) => 1\n(+ 1 1 1) => 3', explain: 'Same for right. Total: 1 (root) + 1 (left) + 1 (right) = 3 nodes.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'The BST ordering property says — for every node:', opts: ['Label is less than left child and greater than right child', 'Label is GREATER THAN all labels in left subtree, LESS THAN all labels in right subtree', 'All nodes must have exactly two children', 'The tree must be balanced (same height on both sides)'], ans: 1, exp: 'BST: for EVERY node, label > ALL labels in left subtree, AND label < ALL labels in right subtree. This holds recursively at every level. Left = smaller, right = larger.' },
+    { q: 'Why is BST search O(log n) on a balanced tree?', opts: ['We only check one node total', 'At each step we eliminate roughly half the remaining nodes', 'BSTs have no cycles so recursion terminates faster', 'Racket optimizes tree operations automatically'], ans: 1, exp: 'At each step we compare n to the root and go either left or right, eliminating the other half. With n nodes and a balanced tree, log2(n) steps maximum. A degenerate BST (all nodes on one side, like a linked list) degrades to O(n).' },
+    { q: 'What is the base case for bt-count?', opts: ['(= (get-label tree) 0) -> 0', '(empty? tree) -> 0', '(empty? tree) -> empty', '(zero? (bt-count tree)) -> 0'], ans: 1, exp: 'An empty tree has 0 nodes. Base case: (cond [(empty? tree) 0] ...). For a non-empty tree: 1 (the root) + count(left) + count(right).' },
+    { q: 'In bst-contains?, when (> (get-label bst) n) is true, we:', opts: ['Return false immediately', 'Recurse on the RIGHT subtree', 'Recurse on the LEFT subtree', 'Return true — close enough'], ans: 2, exp: 'If the current label is BIGGER than n, then n must be in the LEFT subtree (left contains all smaller values). Go left. If the label were smaller than n, go right.' },
+    { q: 'Which is a valid BST? Root=10, left child=5, right child=15, and 5 has right child=12.', opts: ['Yes — all children follow the left<parent<right rule', 'No — 12 is in the left subtree of 10 but 12 > 10, violating the BST property', 'No — a BST cannot have a right child with a right grandchild', 'Yes — as long as immediate children are correct'], ans: 1, exp: 'The BST property requires the label (10) to be greater than ALL labels in its left subtree. The left subtree contains both 5 and 12. But 12 > 10, so having 12 in the left subtree violates the property. It must hold recursively, not just for direct children.' },
+    { q: 'What does (get-left tree) return when tree has no left child?', opts: ['0', 'false', 'empty', 'An error'], ans: 2, exp: 'In our data definition, leaves are constructed as (mk-node label empty empty). So get-left returns empty when there is no left child. We then test (empty? (get-left tree)) to handle the base case.' }
+  ]
+};
+
+LESSONS['genrec'] = {
+  title: 'L14: General Recursion and Accumulators',
+  intro: 'Up until now you followed strict Rules for Recursion: always use rest/sub1/get-left to make things smaller, always test with empty?/zero?. Those rules guarantee termination. Now the training wheels come off. You can recurse however you want — but you must prove termination yourself. This lecture covers three new patterns: accumulators, tail recursion, and mutual recursion.',
+  concepts: [
+    {
+      title: 'Why we need accumulators',
+      body: 'Structural recursion builds the answer on the way BACK UP from the base case. Sometimes this is inefficient or even wrong.\n\n<span class="cm">;; Naive reverse — O(n^2) because append is O(n)</span>\n(<span class="kw">define</span> (<span class="fn">bad-rev</span> lst)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) empty]\n        [<span class="kw">else</span> (<span class="fn">append</span> (<span class="fn">bad-rev</span> (<span class="fn">rest</span> lst))\n                        (<span class="fn">list</span> (<span class="fn">first</span> lst)))]))\n<span class="cm">;; append walks the whole list each call → O(n^2) total</span>\n\nAn accumulator lets us build the answer on the way DOWN, making it O(n).\n\nThe key idea: the accumulator carries "work done so far." When we hit the base case, the accumulator IS the answer.'
+    },
+    {
+      title: 'The Accumulator Pattern',
+      body: '<span class="cm">;; Template for accumulator-style recursion:</span>\n(<span class="kw">define</span> (<span class="fn">fn/acc</span> lst acc)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) acc]                    <span class="cm">; base: return acc</span>\n        [<span class="kw">else</span> (<span class="fn">fn/acc</span> (<span class="fn">rest</span> lst)\n                        (... acc (<span class="fn">first</span> lst)))])) <span class="cm">; update acc</span>\n\n<span class="cm">;; Always wrap with a helper that hides the accumulator:</span>\n(<span class="kw">define</span> (<span class="fn">fn</span> lst) (<span class="fn">fn/acc</span> lst INITIAL-VALUE))\n\n<span class="cm">;; Example: reverse using accumulator</span>\n(<span class="kw">define</span> (<span class="fn">rev</span> lst)\n  (<span class="kw">local</span>\n    [(<span class="kw">define</span> (<span class="fn">rev/acc</span> lst acc)\n       (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) acc]\n             [<span class="kw">else</span> (<span class="fn">rev/acc</span> (<span class="fn">rest</span> lst)\n                              (<span class="fn">cons</span> (<span class="fn">first</span> lst) acc))]))] <span class="cm">; prepend to acc</span>\n    (<span class="fn">rev/acc</span> lst empty)))  <span class="cm">; start with empty acc</span>'
+    },
+    {
+      title: 'What does the accumulator represent?',
+      body: 'Always ask: "What does acc hold at every recursive call?"\n\nFor rev/acc:  acc = the elements we have seen so far, in reverse order\nFor sum/acc:  acc = the sum of elements seen so far\nFor flat-count: acc = the count of non-list elements seen so far\n\n<span class="cm">;; Sum with accumulator</span>\n(<span class="kw">define</span> (<span class="fn">sum</span> lst)\n  (<span class="kw">local</span>\n    [(<span class="kw">define</span> (<span class="fn">sum/acc</span> lst acc)\n       (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) acc]\n             [<span class="kw">else</span> (<span class="fn">sum/acc</span> (<span class="fn">rest</span> lst) (+ acc (<span class="fn">first</span> lst)))]))] <span class="cm">; add to acc</span>\n    (<span class="fn">sum/acc</span> lst <span class="num">0</span>)))  <span class="cm">; start with acc = 0</span>\n\n<span class="cm">;; Trace: (sum (list 3 1 4))</span>\n<span class="cm">;; => (sum/acc (3 1 4) 0)</span>\n<span class="cm">;; => (sum/acc (1 4)   3)   ; acc = 0+3</span>\n<span class="cm">;; => (sum/acc (4)     4)   ; acc = 3+1</span>\n<span class="cm">;; => (sum/acc ()      8)   ; acc = 4+4</span>\n<span class="cm">;; => 8                     ; return acc</span>'
+    },
+    {
+      title: 'Mutual Recursion',
+      body: 'Two functions call each other. f calls g, g calls f. Common use: alternating elements, or two different data types.\n\n<span class="cm">;; Alternate: pick every other element starting from index 0</span>\n(<span class="kw">define</span> (<span class="fn">my-even-elems</span> lst)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) empty]\n        [<span class="kw">else</span> (<span class="fn">cons</span> (<span class="fn">first</span> lst)\n                      (<span class="fn">my-odd-elems</span> (<span class="fn">rest</span> lst)))]))\n\n<span class="cm">;; Skip: pick every other element starting from index 1</span>\n(<span class="kw">define</span> (<span class="fn">my-odd-elems</span> lst)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) empty]\n        [<span class="kw">else</span> (<span class="fn">my-even-elems</span> (<span class="fn">rest</span> lst))]))\n<span class="cm">;; my-odd-elems SKIPS the first element and hands rest to my-even-elems</span>\n\n(<span class="fn">my-even-elems</span> (list <span class="sym">\'a \'b \'c \'d</span>))  <span class="cm">; => (a c)</span>\n(<span class="fn">my-odd-elems</span>  (list <span class="sym">\'a \'b \'c \'d</span>))  <span class="cm">; => (b d)</span>'
+    },
+    {
+      title: 'Termination Arguments',
+      body: 'Without structural rules, you must argue WHY your function terminates.\n\nThe argument must show:\n1. Something STRICTLY DECREASES on every recursive call\n2. It is BOUNDED BELOW by some stopping point\n\nExample — Euclid\'s GCD:\n(<span class="kw">define</span> (<span class="fn">euclid</span> m n)\n  (<span class="kw">cond</span> [(= n <span class="num">0</span>) m]\n        [<span class="kw">else</span> (<span class="fn">euclid</span> n (<span class="fn">remainder</span> m n))]))\n\nTermination argument: the second argument n DECREASES on every call because\n(remainder m n) is always strictly less than n (when n > 0).\nIt is bounded below by 0. So the recursion must terminate.\n\n(<span class="fn">euclid</span> <span class="num">100</span> <span class="num">85</span>)\n=> (<span class="fn">euclid</span> <span class="num">85</span> <span class="num">15</span>)   <span class="cm">; 100 mod 85 = 15</span>\n=> (<span class="fn">euclid</span> <span class="num">15</span> <span class="num">10</span>)   <span class="cm">; 85 mod 15 = 10</span>\n=> (<span class="fn">euclid</span> <span class="num">10</span> <span class="num">5</span>)    <span class="cm">; 15 mod 10 = 5</span>\n=> (<span class="fn">euclid</span> <span class="num">5</span> <span class="num">0</span>)     <span class="cm">; 10 mod 5 = 0</span>\n=> <span class="num">5</span>                 <span class="cm">; base case!</span>'
+    }
+  ],
+  examples: [
+    {
+      title: 'Accumulator trace: (rev (list 1 2 3))',
+      steps: [
+        { math: '(rev (list 1 2 3))\n=> (rev/acc (list 1 2 3) empty)', explain: 'We call rev, which calls rev/acc with the list and acc = empty (nothing seen yet).' },
+        { math: '(rev/acc (list 1 2 3) empty)\n=> (rev/acc (list 2 3) (cons 1 empty))\n=> (rev/acc (list 2 3) (list 1))', explain: 'List is not empty. Recurse: rest of list is (2 3). New acc = (cons 1 empty) = (list 1). The first element 1 gets prepended to acc.' },
+        { math: '(rev/acc (list 2 3) (list 1))\n=> (rev/acc (list 3) (cons 2 (list 1)))\n=> (rev/acc (list 3) (list 2 1))', explain: 'Recurse again. First element is 2. cons 2 onto acc = (list 2 1). Now acc holds the first two elements reversed.' },
+        { math: '(rev/acc (list 3) (list 2 1))\n=> (rev/acc empty (cons 3 (list 2 1)))\n=> (rev/acc empty (list 3 2 1))', explain: 'First element is 3. cons 3 onto acc = (list 3 2 1). All elements seen, reversed in acc.' },
+        { math: '(rev/acc empty (list 3 2 1))\n=> (list 3 2 1)', explain: 'List is empty! Return acc = (list 3 2 1). The accumulator IS the answer. This is O(n) because cons is O(1).' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'What does an accumulator hold during recursion?', opts: ['The rest of the list not yet processed', 'The result computed SO FAR from elements already seen', 'The length of the original list', 'A copy of the original list'], ans: 1, exp: 'An accumulator carries "work done so far." It grows as the list shrinks. At the base case (empty list), the accumulator IS the final answer.' },
+    { q: 'In (rev/acc lst acc), what is the INVARIANT — what acc represents at all times?', opts: ['The elements of lst we have NOT yet seen', 'The elements of the ORIGINAL list seen so far, in REVERSE order', 'The first element of lst', 'The length of lst'], ans: 1, exp: 'At every call, acc holds all elements we have already processed (from left to right in the original list), but in reverse order. When lst is empty, we have processed everything, so acc = the full reversed list.' },
+    { q: 'What is a valid termination argument for the accumulator version of rev?', opts: ['acc gets longer each call, bounded above by the original list length', 'lst gets shorter each call (by exactly one element) and is bounded below by empty', 'The first element of lst decreases each call', 'acc eventually equals the original list'], ans: 1, exp: 'Each recursive call takes (rest lst), so lst loses one element per call. lst cannot get shorter than empty (0 elements). So the recursion terminates after exactly (length lst) steps.' },
+    { q: 'What is mutual recursion?', opts: ['A function that calls itself directly twice in one branch', 'Two or more functions that call each other', 'Recursion with two accumulators', 'A function with two base cases'], ans: 1, exp: 'Mutual recursion: function f calls g, and g calls f. They alternate. Common use: processing alternating elements, or handling two different data variants (like nodes and lists of children in a general tree).' },
+    { q: 'Why is the accumulator version of rev O(n) while the naive version is O(n^2)?', opts: ['The accumulator version uses less memory', 'cons is O(1) but append is O(n). Accumulator version uses cons; naive uses append n times', 'They are actually the same complexity', 'The accumulator version makes fewer recursive calls'], ans: 1, exp: 'cons always takes O(1) — it just adds one element to the front. append must walk the entire left list, which is O(n). The naive reverse calls append n times on ever-growing lists: O(1) + O(2) + ... + O(n) = O(n^2).' }
+  ]
+};
+
+LESSONS['gentrees'] = {
+  title: 'L15: General Trees and Expression Trees',
+  intro: 'Binary trees have exactly two subtrees. General trees can have ANY number of children. In CS 135 these are represented as arbitrarily nested lists. The key insight: a general tree is either a leaf (a number) or a non-empty list of general trees. This leads to mutual recursion — one function handles the tree, another handles the list of children.',
+  concepts: [
+    {
+      title: 'NTree: Trees with any number of children',
+      body: '<span class="cm">;; A tree of numbers (NTree) is one of:</span>\n<span class="cm">;; * Num                              (a leaf — just a number)</span>\n<span class="cm">;; * (cons NTree (listof NTree))      (a node with children)</span>\n<span class="cm">;; Note: empty is NOT an NTree!</span>\n\n<span class="cm">;; Example NTree:</span>\n(<span class="kw">define</span> nt-eg\n  (<span class="fn">list</span> <span class="num">6</span>\n        (<span class="fn">list</span> <span class="num">8</span> <span class="num">9</span> <span class="num">3</span>)\n        (<span class="fn">list</span> <span class="num">1</span>\n              (<span class="fn">list</span> <span class="num">5</span> <span class="num">2</span>)\n              <span class="num">7</span>)\n        <span class="num">4</span>))\n\n<span class="cm">;; This represents a tree where:</span>\n<span class="cm">;; - Root has 3 children: (list 8 9 3), (list 1 ...), and 4</span>\n<span class="cm">;; - (list 8 9 3): has children 8, 9, 3 (all leaves)</span>\n<span class="cm">;; - (list 1 ...): has children (list 5 2) and 7</span>\n<span class="cm">;; - (list 5 2): has children 5 and 2</span>\n<span class="cm">;; - 4 is a leaf, 7 is a leaf, etc.</span>'
+    },
+    {
+      title: 'The NTree Template — Mutual Recursion',
+      body: 'An NTree has THREE cases:\n1. Just a number (leaf)\n2. A list with exactly one child (first is NTree, rest is empty)\n3. A list with multiple children (first is NTree, rest is listof NTree)\n\n(<span class="kw">define</span> (<span class="fn">fn-ntree</span> nt)\n  (<span class="kw">cond</span> [(<span class="fn">number?</span> nt) ...]                     <span class="cm">; leaf case</span>\n        [(<span class="fn">empty?</span> (<span class="fn">rest</span> nt))                     <span class="cm">; one child</span>\n         (... (<span class="fn">fn-ntree</span> (<span class="fn">first</span> nt)))]\n        [<span class="kw">else</span>                                      <span class="cm">; multiple children</span>\n         (... (<span class="fn">fn-ntree</span> (<span class="fn">first</span> nt))               <span class="cm">; process first child</span>\n              (<span class="fn">fn-ntree</span> (<span class="fn">rest</span> nt)))])             <span class="cm">; process rest (a list!)</span>\n\n<span class="cm">;; KEY INSIGHT: fn-ntree calls itself on BOTH (first nt) [an NTree]</span>\n<span class="cm">;; and (rest nt) [a listof NTree].</span>\n<span class="cm">;; This is MUTUAL RECURSION: NTree and (listof NTree) recurse on each other.</span>\n\n<span class="cm">;; Sum all numbers in an NTree:</span>\n(<span class="kw">define</span> (<span class="fn">nt-sum</span> nt)\n  (<span class="kw">cond</span> [(<span class="fn">number?</span> nt) nt]                     <span class="cm">; leaf: value is the number itself</span>\n        [(<span class="fn">empty?</span> (<span class="fn">rest</span> nt)) (<span class="fn">nt-sum</span> (<span class="fn">first</span> nt))]\n        [<span class="kw">else</span> (+ (<span class="fn">nt-sum</span> (<span class="fn">first</span> nt))\n                 (<span class="fn">nt-sum</span> (<span class="fn">rest</span> nt)))]))'
+    },
+    {
+      title: 'Expression Trees',
+      body: 'An expression tree has OPERATORS at internal nodes and NUMBERS at leaves.\n\n<span class="cm">;; (+ (* 4 2) 3 (+ 5 1 2) 2)  represents:</span>\n<span class="cm">;;         +</span>\n<span class="cm">;;    /  |   |  \\</span>\n<span class="cm">;;   *   3   +   2</span>\n<span class="cm">;;  / \\     /|\\ </span>\n<span class="cm">;;  4  2   5  1  2</span>\n\n<span class="cm">;; An arithmetic expression (AExp) is one of:</span>\n<span class="cm">;; * Num (a leaf)</span>\n<span class="cm">;; * (list Op AExp ...) where Op is a symbol (+ or *)</span>\n\n(<span class="kw">define</span> ae-eg1 (list <span class="sym">\'*</span> <span class="num">3</span> <span class="num">7</span>))    <span class="cm">; (* 3 7) = 21</span>\n(<span class="kw">define</span> ae-eg2 (list <span class="sym">\'+</span> (list <span class="sym">\'*</span> <span class="num">4</span> <span class="num">2</span>) <span class="num">3</span> <span class="num">2</span>))  <span class="cm">; (4*2)+3+2 = 13</span>\n\n<span class="cm">;; eval: AExp -> Num</span>\n(<span class="kw">define</span> (<span class="fn">my-eval</span> exp)\n  (<span class="kw">cond</span> [(<span class="fn">number?</span> exp) exp]              <span class="cm">; base: a number evaluates to itself</span>\n        [(<span class="fn">symbol=?</span> (<span class="fn">first</span> exp) <span class="sym">\'*</span>)        <span class="cm">; multiplication</span>\n         (<span class="fn">apply</span> * (<span class="fn">map</span> <span class="fn">my-eval</span> (<span class="fn">rest</span> exp)))]\n        [<span class="kw">else</span>                               <span class="cm">; addition</span>\n         (<span class="fn">apply</span> + (<span class="fn">map</span> <span class="fn">my-eval</span> (<span class="fn">rest</span> exp)))]))'
+    },
+    {
+      title: 'What is an Atom?',
+      body: 'In Racket, an ATOM is any value that is not a list.\n\nAtoms include: numbers (5, 3.14), booleans (true, false), symbols (\'hello), strings ("hi"), characters (#\\a)\n\nNon-atoms: empty, (list 1 2 3), (cons 1 empty)\n\n<span class="cm">;; Atom?: Any -> Bool</span>\n(<span class="kw">define</span> (<span class="fn">Atom?</span> x)\n  (<span class="fn">not</span> (<span class="fn">cons?</span> x)))\n\n(<span class="fn">Atom?</span> <span class="num">5</span>)            <span class="cm">; => true   (number is an atom)</span>\n(<span class="fn">Atom?</span> <span class="sym">\'hello</span>)       <span class="cm">; => true   (symbol is an atom)</span>\n(<span class="fn">Atom?</span> empty)        <span class="cm">; => true   (empty is an atom!)</span>\n(<span class="fn">Atom?</span> (list <span class="num">1 2</span>))  <span class="cm">; => false  (cons cell is not an atom)</span>\n\n<span class="cm">;; Count atoms in a nested list:</span>\n(<span class="kw">define</span> (<span class="fn">count-atoms</span> x)\n  (<span class="kw">cond</span> [(<span class="fn">Atom?</span> x) <span class="num">1</span>]\n        [<span class="kw">else</span> (+ (<span class="fn">count-atoms</span> (<span class="fn">first</span> x))\n                 (<span class="fn">count-atoms</span> (<span class="fn">rest</span> x)))]))'
+    }
+  ],
+  examples: [
+    {
+      title: 'NTree mutual recursion trace',
+      steps: [
+        { math: '(nt-sum (list 6 (list 8 9) 4))', explain: 'We want to sum all numbers. The tree is: 6 with children (list 8 9) and 4.' },
+        { math: 'Not a number. rest is not empty.\n=> (+ (nt-sum 6) (nt-sum (list (list 8 9) 4)))', explain: 'Multiple children case: sum first child + sum rest. First child is 6 (a leaf). Rest is ((list 8 9) 4).' },
+        { math: '(nt-sum 6) => 6   [leaf base case]\n(nt-sum (list (list 8 9) 4)):\n  => (+ (nt-sum (list 8 9)) (nt-sum (list 4)))', explain: '6 is a number — return 6. Now process ((list 8 9) 4). Multiple children again.' },
+        { math: '(nt-sum (list 8 9)):\n  => (+ (nt-sum 8) (nt-sum (list 9)))\n  => (+ 8 9) => 17\n(nt-sum (list 4)) => (nt-sum 4) => 4', explain: '8 and 9 are leaves. (list 9) has one child (empty? (rest (list 9)) is true). Sum = 17 and 4.' },
+        { math: '(+ 6 17 4) => 27', explain: 'All values: 6 + (8+9) + 4 = 27. The mutual recursion visited every leaf exactly once.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'An NTree in CS 135 is:', opts: ['A tree where every node has exactly two children', 'Either a number (leaf) OR a non-empty list of NTrees', 'A list where every element is a number', 'A tree stored as a sorted list'], ans: 1, exp: 'The NTree data definition: a number (leaf) OR (cons NTree (listof NTree)). Note: empty is NOT an NTree! Every internal node has at least one child.' },
+    { q: 'Why does the NTree template use mutual recursion?', opts: ['Because trees have two subtrees like binary trees', 'Because processing an NTree requires processing a list of NTrees, and vice versa — they are defined in terms of each other', 'Because mutual recursion is always faster', 'Because Racket requires mutual recursion for nested lists'], ans: 1, exp: 'An NTree is either a number or a (cons NTree (listof NTree)). When we process the (rest nt), we get a (listof NTree) — a different type! Recursing on (first nt) processes an NTree; recursing on (rest nt) processes a list of NTrees. Two types, mutual recursion.' },
+    { q: 'What is an atom in Racket?', opts: ['Any number', 'Any value that is not a cons cell (not a list)', 'Any symbol', 'Any value that is not empty'], ans: 1, exp: 'An atom is any value that is not a cons cell. This includes: numbers, symbols, strings, booleans, characters, and empty. The predicate is (not (cons? x)). Surprising: empty IS an atom because it is not a cons cell.' },
+    { q: 'In an expression tree, what do internal nodes and leaves contain?', opts: ['Internal nodes contain numbers, leaves contain operators', 'Internal nodes contain operators (like + or *), leaves contain numbers', 'Both contain numbers', 'Internal nodes are empty, leaves contain numbers'], ans: 1, exp: 'Expression tree structure: leaves are numbers (the actual values being computed), internal nodes are operators (+, *) whose children are the operands. To evaluate: recursively evaluate all children, then apply the operator.' },
+    { q: 'What are the THREE cases in the NTree template?', opts: ['empty, one element, multiple elements', 'number (leaf), list with one NTree child, list with multiple NTree children', 'leaf, internal node, root', 'atom, symbol, list'], ans: 1, exp: 'NTree template: (1) number? nt -> it is a leaf, return or process directly. (2) (empty? (rest nt)) -> single child, recurse on (first nt). (3) else -> multiple children, recurse on both (first nt) and (rest nt).' }
+  ]
+};
+
+LESSONS['local'] = {
+  title: 'L16: Local Expressions',
+  intro: 'local lets you define names that exist ONLY inside a specific expression. This solves four concrete problems. On exams, the most tested uses are efficiency (avoiding recomputation) and encapsulation (hiding helper functions). Switch your language level to "Intermediate Student" to use local.',
+  concepts: [
+    {
+      title: 'The local Syntax',
+      body: '(<span class="kw">local</span>\n  [(<span class="kw">define</span> name1 expr1)    <span class="cm">; define a constant</span>\n   (<span class="kw">define</span> name2 expr2)    <span class="cm">; define another constant</span>\n   (<span class="kw">define</span> (<span class="fn">f</span> x) body)   <span class="cm">; define a function</span>\n   ...]                    <span class="cm">; all definitions go here</span>\n  main-expression)         <span class="cm">; this is what local evaluates to\n\n;; These definitions have scope ONLY inside main-expression.\n;; They are completely invisible outside the local.\n;; The whole local expression = the value of main-expression.\n\n;; Simple example:\n(local [(define x 5)\n        (define y 3)]\n  (+ x y))   ;; => 8\n;; x and y do NOT exist after this local.'
+    },
+    {
+      title: 'Benefit 1 — Efficiency: Avoid Recomputation',
+      body: 'THIS IS THE MOST TESTED USE OF local ON EXAMS.\n\n<span class="cm">;; WITHOUT local — expensive computation repeated 3 times:</span>\n(<span class="kw">define</span> (<span class="fn">heron-bad</span> a b c)\n  (<span class="fn">sqrt</span> (* (/ (+ a b c) <span class="num">2</span>)\n            (- (/ (+ a b c) <span class="num">2</span>) a)\n            (- (/ (+ a b c) <span class="num">2</span>) b)\n            (- (/ (+ a b c) <span class="num">2</span>) c))))\n<span class="cm">;; (/ (+ a b c) 2) is computed FOUR times! Wasteful.</span>\n\n<span class="cm">;; WITH local — computed exactly ONCE:</span>\n(<span class="kw">define</span> (<span class="fn">heron</span> a b c)\n  (<span class="kw">local</span> [(<span class="kw">define</span> s (/ (+ a b c) <span class="num">2</span>))]   <span class="cm">; s computed once</span>\n    (<span class="fn">sqrt</span> (* s (- s a) (- s b) (- s c)))))  <span class="cm">; reused 4 times</span>\n\n<span class="cm">;; If (/ (+ a b c) 2) takes T time, bad version takes 4T, good takes T.</span>'
+    },
+    {
+      title: 'Benefit 2 — Encapsulation: Hide Helpers',
+      body: '<span class="cm">;; WITHOUT local — rev/acc is visible everywhere (bad!)</span>\n(<span class="kw">define</span> (<span class="fn">rev/acc</span> lst acc)\n  (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) acc]\n        [<span class="kw">else</span> (<span class="fn">rev/acc</span> (<span class="fn">rest</span> lst) (<span class="fn">cons</span> (<span class="fn">first</span> lst) acc))]))\n(<span class="kw">define</span> (<span class="fn">rev</span> lst) (<span class="fn">rev/acc</span> lst empty))\n\n<span class="cm">;; WITH local — rev/acc is hidden inside rev (good!)</span>\n(<span class="kw">define</span> (<span class="fn">rev</span> lst)\n  (<span class="kw">local</span>\n    [(<span class="kw">define</span> (<span class="fn">rev/acc</span> lst acc)\n       (<span class="kw">cond</span> [(<span class="fn">empty?</span> lst) acc]\n             [<span class="kw">else</span> (<span class="fn">rev/acc</span> (<span class="fn">rest</span> lst)\n                              (<span class="fn">cons</span> (<span class="fn">first</span> lst) acc))]))]  <span class="cm">; hidden here!</span>\n    (<span class="fn">rev/acc</span> lst empty)))\n<span class="cm">;; rev/acc is completely invisible outside rev. Callers only see rev.</span>'
+    },
+    {
+      title: 'Benefit 3 — Clarity: Name Subexpressions',
+      body: '<span class="cm">;; WITHOUT local — hard to read:</span>\n(<span class="kw">define</span> (<span class="fn">distance</span> p1 p2)\n  (<span class="fn">sqrt</span> (+ (<span class="fn">sqr</span> (- (<span class="fn">get-x</span> p1) (<span class="fn">get-x</span> p2)))\n            (<span class="fn">sqr</span> (- (<span class="fn">get-y</span> p1) (<span class="fn">get-y</span> p2))))))\n\n<span class="cm">;; WITH local — much clearer, and no recomputation:</span>\n(<span class="kw">define</span> (<span class="fn">distance</span> p1 p2)\n  (<span class="kw">local</span> [(<span class="kw">define</span> dx (- (<span class="fn">get-x</span> p1) (<span class="fn">get-x</span> p2)))\n           (<span class="kw">define</span> dy (- (<span class="fn">get-y</span> p1) (<span class="fn">get-y</span> p2)))]\n    (<span class="fn">sqrt</span> (+ (<span class="fn">sqr</span> dx) (<span class="fn">sqr</span> dy)))))'
+    },
+    {
+      title: 'Benefit 4 — Scope: Safely Reuse Names',
+      body: 'Names inside local SHADOW outer names with the same name.\n\n(<span class="kw">define</span> s <span class="num">7</span>)     <span class="cm">; global s = 7</span>\n\n(<span class="kw">define</span> (<span class="fn">heron</span> a b c)\n  (<span class="kw">local</span> [(<span class="kw">define</span> s (/ (+ a b c) <span class="num">2</span>))]   <span class="cm">; local s shadows global s</span>\n    (<span class="fn">sqrt</span> (* s (- s a) (- s b) (- s c)))))\n\n(<span class="fn">heron</span> <span class="num">7 7 7</span>)  <span class="cm">; inside, s = (/ 21 2) = 10.5, NOT the global 7</span>\n\n<span class="cm">;; The global s = 7 is completely unaffected by the local.</span>\n<span class="cm">;; Shadowing lets you use natural variable names without worrying</span>\n<span class="cm">;; about clashing with names defined elsewhere in the program.</span>'
+    }
+  ],
+  examples: [
+    {
+      title: 'Step-by-step: evaluating a local',
+      steps: [
+        { math: '(local [(define a 3)\n        (define b 4)]\n  (+ (* a a) (* b b)))', explain: 'We have a local with two definitions (a=3, b=4) and a body expression.' },
+        { math: 'Step 1: evaluate each definition\na -> 3\nb -> 4\nBoth are now bound within the local.', explain: 'Definitions are evaluated in order. a gets the value 3, b gets 4. These bindings only exist inside the local.' },
+        { math: 'Step 2: evaluate the body with substitution\n(+ (* 3 3) (* 4 4))\n= (+ 9 16)\n= 25', explain: 'Substitute a=3 and b=4 into the body. Evaluate the resulting expression. 25 is the value of the entire local expression.' },
+        { math: 'Result: 25\nAfter the local: a and b no longer exist.', explain: 'The local evaluates to 25. a and b are gone — they were local to this expression. This is the scope rule: definitions are only visible inside the local.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'What are the four benefits of local in CS 135?', opts: ['Recursion, Iteration, Efficiency, Clarity', 'Clarity, Encapsulation, Scope, Efficiency', 'Typing, Testing, Debugging, Clarity', 'Abstraction, Composition, Currying, Scope'], ans: 1, exp: 'The four benefits of local are: Clarity (giving meaningful names to subexpressions), Encapsulation (hiding helpers), Scope (reusing names without clashing), and Efficiency (computing values only once instead of repeatedly).' },
+    { q: 'What happens to x after: (local [(define x 5)] (+ x 3))?', opts: ['x = 5 globally', 'x = 8 globally', 'x is undefined outside the local', 'x = 3 globally'], ans: 2, exp: 'x has scope ONLY inside the local expression. Outside the local, x is completely invisible — it does not exist. If you tried (+ x 1) after the local, you would get an unbound identifier error.' },
+    { q: 'When is local MOST useful for efficiency?', opts: ['When the computation is cheap like adding two numbers', 'When an expensive computation appears multiple times and you want to compute it once', 'When you need the result only once', 'When writing check-expect tests'], ans: 1, exp: 'local for efficiency only helps when: (1) the same computation would be done multiple times, AND (2) the computation is expensive. Using local when a value is only needed once saves no time — it just adds clarity.' },
+    { q: 'Which correctly encapsulates a helper using local?', opts: ['(define (f lst) (helper lst))\n(local [(define (helper x) x)] empty)', '(define (f lst) (local [(define (helper x) x)] (helper lst)))', '(local (define (f lst) (helper lst)) (define (helper x) x))', '(define (helper x) (local [(define f x)] f))'], ans: 1, exp: 'Encapsulation: the helper is defined INSIDE the local inside f. This makes helper invisible outside f. The local is inside f\'s body, so helper exists only while f is executing.' },
+    { q: '(define n 10) (local [(define n 20)] (+ n 5)) — what does this evaluate to?', opts: ['15', '25', '30', 'Error — n is defined twice'], ans: 1, exp: '25. Inside the local, the local definition of n (= 20) SHADOWS the outer n (= 10). So n = 20 inside the local, and 20 + 5 = 25. The outer n = 10 is unaffected and still exists after the local.' }
+  ]
+};
+
+LESSONS['lambda'] = {
+  title: 'L17: Lambda and First-Class Functions',
+  intro: 'Lambda creates anonymous functions — functions with no name. In Racket, functions are "first-class values": they can be passed as arguments, returned from other functions, and stored in lists, just like numbers and symbols. This is the most important concept in CS 135. Master it and the rest flows naturally.',
+  concepts: [
+    {
+      title: 'What is lambda?',
+      body: '(<span class="kw">lambda</span> (param1 param2 ...) body)\n\nlambda creates a FUNCTION VALUE. It has parameters and a body.\nIt has NO name — that is why it is "anonymous."\n\n<span class="cm">;; These two definitions are EXACTLY equivalent:</span>\n(<span class="kw">define</span> (<span class="fn">add2</span> x) (+ x <span class="num">2</span>))\n(<span class="kw">define</span> add2 (<span class="kw">lambda</span> (x) (+ x <span class="num">2</span>)))\n\n<span class="cm">;; The truth: (define (f x) body) is just shorthand for</span>\n<span class="cm">;; (define f (lambda (x) body))</span>\n<span class="cm">;; Every function you have ever written IS a lambda!</span>\n\n<span class="cm">;; Use lambda directly (without naming it):</span>\n((<span class="kw">lambda</span> (x) (+ x <span class="num">2</span>)) <span class="num">5</span>)           <span class="cm">; => 7</span>\n((<span class="kw">lambda</span> (x y) (* x y)) <span class="num">3</span> <span class="num">4</span>)     <span class="cm">; => 12</span>\n((<span class="kw">lambda</span> (x) (<span class="fn">sqr</span> x)) <span class="num">7</span>)          <span class="cm">; => 49</span>'
+    },
+    {
+      title: 'Beta-Reduction: How Lambda Applications Work',
+      body: 'When you apply a lambda to arguments, you SUBSTITUTE each parameter with its argument in the body. This is called beta-reduction.\n\nRule: ((lambda (x) BODY) VALUE) => BODY with x replaced by VALUE\n\n<span class="cm">;; Example 1: one parameter</span>\n((<span class="kw">lambda</span> (x) (* x x)) <span class="num">6</span>)\n=> (* <span class="num">6</span> <span class="num">6</span>)      <span class="cm">; replace x with 6 in body (* x x)</span>\n=> <span class="num">36</span>\n\n<span class="cm">;; Example 2: two parameters</span>\n((<span class="kw">lambda</span> (x y) (+ x (* <span class="num">2</span> y))) <span class="num">3</span> <span class="num">5</span>)\n=> (+ <span class="num">3</span> (* <span class="num">2</span> <span class="num">5</span>))  <span class="cm">; replace x=3, y=5</span>\n=> (+ <span class="num">3</span> <span class="num">10</span>)\n=> <span class="num">13</span>\n\n<span class="cm">;; For named functions: TWO steps</span>\n<span class="cm">;; Step 1: replace function name with its lambda definition</span>\n<span class="cm">;; Step 2: substitute parameters with arguments</span>\n(<span class="fn">add2</span> <span class="num">5</span>)\n=> ((<span class="kw">lambda</span> (x) (+ x <span class="num">2</span>)) <span class="num">5</span>)   <span class="cm">; step 1</span>\n=> (+ <span class="num">5</span> <span class="num">2</span>)               <span class="cm">; step 2</span>\n=> <span class="num">7</span>'
+    },
+    {
+      title: 'First-Class Functions: The Big Idea',
+      body: 'In Racket, functions are values. They can go anywhere values can go.\n\n<span class="cm">;; 1. Pass a function as an argument:</span>\n(<span class="kw">define</span> (<span class="fn">apply-twice</span> f x) (f (f x)))\n(<span class="fn">apply-twice</span> add1 <span class="num">5</span>)   <span class="cm">; => 7  (add1(add1(5)))</span>\n(<span class="fn">apply-twice</span> <span class="fn">sqr</span> <span class="num">3</span>)    <span class="cm">; => 81 (sqr(sqr(3)) = sqr(9))</span>\n\n<span class="cm">;; 2. Return a function as a result:</span>\n(<span class="kw">define</span> (<span class="fn">make-adder</span> n)\n  (<span class="kw">lambda</span> (x) (+ x n)))  <span class="cm">; returns a FUNCTION, not a number</span>\n(<span class="kw">define</span> add5 (<span class="fn">make-adder</span> <span class="num">5</span>))  <span class="cm">; add5 is now a function</span>\n(<span class="fn">add5</span> <span class="num">10</span>)  <span class="cm">; => 15</span>\n(<span class="fn">add5</span> <span class="num">3</span>)   <span class="cm">; => 8</span>\n\n<span class="cm">;; 3. Store functions in a list:</span>\n(<span class="kw">define</span> fns (<span class="fn">list</span> add1 <span class="fn">sqr</span> even?))\n((<span class="fn">first</span> fns) <span class="num">5</span>)   <span class="cm">; => 6  (add1(5))</span>\n((<span class="fn">second</span> fns) <span class="num">5</span>)  <span class="cm">; => 25 (sqr(5))</span>\n((<span class="fn">third</span> fns) <span class="num">5</span>)   <span class="cm">; => false (even?(5))</span>'
+    },
+    {
+      title: 'Closures: Functions That Remember',
+      body: 'When a lambda is created inside another function, it "closes over" (captures) the variables in scope. This captured environment stays with the function even after the outer call returns.\n\n(<span class="kw">define</span> (<span class="fn">make-multiplier</span> n)\n  (<span class="kw">lambda</span> (x) (* x n)))  <span class="cm">; n is CAPTURED from make-multiplier</span>\n\n(<span class="kw">define</span> triple (<span class="fn">make-multiplier</span> <span class="num">3</span>))  <span class="cm">; n=3 is captured in triple</span>\n(<span class="kw">define</span> double (<span class="fn">make-multiplier</span> <span class="num">2</span>))  <span class="cm">; n=2 is captured in double</span>\n\n(<span class="fn">triple</span> <span class="num">7</span>)   <span class="cm">; => 21  (uses its captured n=3)</span>\n(<span class="fn">double</span> <span class="num">7</span>)   <span class="cm">; => 14  (uses its captured n=2)</span>\n(<span class="fn">triple</span> <span class="num">10</span>)  <span class="cm">; => 30  (always n=3 for triple)</span>\n\n<span class="cm">;; triple and double are DIFFERENT functions even though both came</span>\n<span class="cm">;; from make-multiplier. Each has its own private copy of n.</span>'
+    },
+    {
+      title: 'Curry and Uncurry',
+      body: 'CURRYING: transform a function of two arguments into a chain of one-argument functions.\nThis lets you apply arguments ONE AT A TIME.\n\n(<span class="kw">define</span> (<span class="fn">curry</span> f)\n  (<span class="kw">lambda</span> (x)\n    (<span class="kw">lambda</span> (y)\n      (f x y))))     <span class="cm">; outer takes x, inner takes y, applies f</span>\n\n<span class="cm">;; Trace: (((curry *) 3) 7)</span>\n<span class="cm">;; (curry *) => (lambda (x) (lambda (y) (* x y)))</span>\n<span class="cm">;; ((curry *) 3) => (lambda (y) (* 3 y))   [x=3 captured]</span>\n<span class="cm">;; (((curry *) 3) 7) => (* 3 7) => 21</span>\n\nUNCURRYING: the reverse — take a curried function, make it accept both args at once.\n(<span class="kw">define</span> (<span class="fn">uncurry</span> f)\n  (<span class="kw">lambda</span> (x y) ((f x) y)))\n\n<span class="cm">;; Check: (((curry cons) 0) (list 1 2 3)) => (list 0 1 2 3)</span>\n<span class="cm">;; ((uncurry (curry cons)) 0 (list 1 2 3)) => (list 0 1 2 3)</span>'
+    }
+  ],
+  examples: [
+    {
+      title: 'Beta-reduction: step by step',
+      steps: [
+        { math: '((lambda (x y) (+ (* x x) (* y y))) 3 4)', explain: 'We are applying a 2-parameter lambda to arguments 3 and 4. The parameters are x and y. The body is (+ (* x x) (* y y)).' },
+        { math: 'Step 1: identify substitutions\nx -> 3\ny -> 4', explain: 'Each parameter maps to its corresponding argument in order.' },
+        { math: '(+ (* 3 3) (* 4 4))', explain: 'Substitute x=3 and y=4 everywhere in the body. The lambda disappears.' },
+        { math: '(+ 9 16) => 25', explain: 'Evaluate the resulting expression. 3^2 + 4^2 = 9 + 16 = 25. This is the Pythagorean distance formula!' }
+      ]
+    },
+    {
+      title: 'make-adder: closure demo',
+      steps: [
+        { math: '(define make-adder\n  (lambda (n)\n    (lambda (x) (+ x n))))', explain: 'make-adder is a function that takes n and RETURNS a function. The returned function takes x and adds n to it. n will be captured.' },
+        { math: '(define add10 (make-adder 10))', explain: 'Call make-adder with n=10. Returns the lambda (lambda (x) (+ x 10)) with 10 captured. This lambda is stored as add10.' },
+        { math: '(add10 7)\n=> ((lambda (x) (+ x 10)) 7)\n=> (+ 7 10)\n=> 17', explain: 'Apply add10 to 7. Beta-reduce: substitute x=7. The captured n=10 is still there. Result: 17.' },
+        { math: '(add10 100) => 110\n(add10 -3) => 7', explain: 'add10 always adds 10, regardless of argument. The closure permanently captures n=10.' }
+      ]
+    },
+    {
+      title: 'Curry: step by step',
+      steps: [
+        { math: '(curry cons)', explain: 'Apply curry to cons (a 2-argument function). curry returns (lambda (x) (lambda (y) (cons x y))).' },
+        { math: '((curry cons) 0)\n=> ((lambda (x) (lambda (y) (cons x y))) 0)\n=> (lambda (y) (cons 0 y))   [x=0 captured]', explain: 'Apply the curried function to 0. x=0 is captured. Returns a new function waiting for y.' },
+        { math: "(((curry cons) 0) '(1 2 3))\n=> ((lambda (y) (cons 0 y)) '(1 2 3))\n=> (cons 0 '(1 2 3))\n=> '(0 1 2 3)", explain: 'Apply the result to (1 2 3). y=(1 2 3). Evaluates cons. Currying let us apply cons one argument at a time.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'What does beta-reduction do?', opts: ['Creates a new lambda expression', 'Substitutes each parameter with its argument in the lambda body', 'Checks if two lambdas compute the same function', 'Converts a named function to an anonymous one'], ans: 1, exp: 'Beta-reduction: given ((lambda (x) BODY) VALUE), replace every free occurrence of x in BODY with VALUE. The lambda disappears. This is how function application works in the substitution model.' },
+    { q: 'Evaluate: ((lambda (x) (* x (+ x 1))) 4)', opts: ['20', '24', '16', '8'], ans: 0, exp: 'Substitute x=4: (* 4 (+ 4 1)) = (* 4 5) = 20.' },
+    { q: 'What does (make-adder 7) return?', opts: ['The number 7', 'A function that adds 7 to its argument', 'An error', 'The list (list 7)'], ans: 1, exp: '(make-adder 7) calls the outer lambda with n=7, which returns the inner lambda (lambda (x) (+ x 7)). This inner lambda IS the return value — a function, not a number.' },
+    { q: 'Evaluate: (((curry +) 10) 5)', opts: ['15', '50', 'A function', 'Error'], ans: 0, exp: '(curry +) returns (lambda (x) (lambda (y) (+ x y))). Apply to 10: (lambda (y) (+ 10 y)). Apply to 5: (+ 10 5) = 15.' },
+    { q: 'What is a closure?', opts: ['A function with no parameters', 'A function (lambda) that captures variables from its surrounding scope at creation time', 'A function that calls itself', 'A function with a local definition inside it'], ans: 1, exp: 'A closure is a function (lambda) together with the bindings from the environment where it was created. When the lambda is created inside another function, it captures (closes over) the outer variables. Those captured values stay with the lambda even after the outer function returns.' },
+    { q: 'Which expression produces a function that doubles its argument?', opts: ['(lambda (x) (* x 2))', '(* x 2)', '(define (double x) (* x 2))', 'Both A and C produce functions, but lambda is anonymous'], ans: 3, exp: 'Both (lambda (x) (* x 2)) and (define (double x) (* x 2)) produce functions that double their argument. The define form is just syntactic sugar for (define double (lambda (x) (* x 2))). Both are correct.' }
+  ]
+};
+
+LESSONS['hof'] = {
+  title: 'L18: Higher-Order Functions',
+  intro: 'A higher-order function (HOF) is one that consumes or produces other functions. L18 builds on L17 by showing more complex patterns: function composition, lists of functions, and how HOFs enable extremely general, reusable code with minimal duplication.',
+  concepts: [
+    {
+      title: 'Higher-order functions — the concept',
+      body: 'A function is "higher-order" if it:\n  - Takes a function as an ARGUMENT, OR\n  - Returns a function as a RESULT (or both)\n\n<span class="cm">;; apply-twice takes f (a function) and applies it twice to x</span>\n(<span class="kw">define</span> (<span class="fn">apply-twice</span> f x) (f (f x)))\n<span class="cm">;; Contract: apply-twice: (X -> X) X -> X</span>\n\n(<span class="fn">apply-twice</span> add1 <span class="num">5</span>)     <span class="cm">; => 7   add1(add1(5))</span>\n(<span class="fn">apply-twice</span> <span class="fn">sqr</span> <span class="num">2</span>)      <span class="cm">; => 16  sqr(sqr(2)) = sqr(4)</span>\n(<span class="fn">apply-twice</span> <span class="fn">rest</span> (list <span class="num">1 2 3 4</span>))  <span class="cm">; => (list 3 4)</span>\n\n<span class="cm">;; Why HOFs? Instead of writing keep-evens, keep-odds, keep-positives</span>\n<span class="cm">;; separately, write ONE filter and pass different predicates!</span>'
+    },
+    {
+      title: 'HOF Contracts',
+      body: 'Contracts use TYPE VARIABLES (X, Y, Z) to describe relationships.\n\n<span class="cm">;; (X -> Y) means: a function from X to Y</span>\n<span class="cm">;; (listof X) means: a list where every element is type X</span>\n\n<span class="cm">;; filter:</span>\n<span class="cm">;; filter: (X -> Bool) (listof X) -> (listof X)</span>\n\n<span class="cm">;; map:</span>\n<span class="cm">;; map: (X -> Y) (listof X) -> (listof Y)</span>\n\n<span class="cm">;; compose:</span>\n<span class="cm">;; compose: (Y -> Z) (X -> Y) -> (X -> Z)</span>\n\n<span class="cm">;; apply-twice:</span>\n<span class="cm">;; apply-twice: (X -> X) X -> X</span>\n\nYou will NOT be asked to write HOF contracts on the exam.\nBut you MUST be able to READ and understand them.'
+    },
+    {
+      title: 'Function Composition',
+      body: '<span class="cm">;; compose: (Y -> Z) (X -> Y) -> (X -> Z)</span>\n(<span class="kw">define</span> (<span class="fn">compose</span> f g)\n  (<span class="kw">lambda</span> (x) (f (g x))))   <span class="cm">; g is applied FIRST, then f</span>\n\n<span class="cm">;; IMPORTANT: order is right-to-left! (compose f g) applies g first!</span>\n\n(<span class="kw">define</span> sq-then-add1 (<span class="fn">compose</span> add1 <span class="fn">sqr</span>))\n(<span class="fn">sq-then-add1</span> <span class="num">5</span>)    <span class="cm">; => 26  sqr(5)=25, then add1(25)=26</span>\n\n(<span class="kw">define</span> add1-then-sq (<span class="fn">compose</span> <span class="fn">sqr</span> add1))\n(<span class="fn">add1-then-sq</span> <span class="num">5</span>)    <span class="cm">; => 36  add1(5)=6, then sqr(6)=36</span>\n\n<span class="cm">;; Order matters! compose is not commutative.</span>\n<span class="cm">;; sq-then-add1 != add1-then-sq  (26 != 36)</span>'
+    },
+    {
+      title: 'Lists of Functions',
+      body: 'Since functions are first-class, they can be list elements.\n\n(<span class="kw">define</span> math-ops (<span class="fn">list</span> + - * <span class="fn">max</span> <span class="fn">min</span>))\n(<span class="fn">map</span> (<span class="kw">lambda</span> (op) (op <span class="num">10</span> <span class="num">3</span>)) math-ops)\n<span class="cm">; => (13 7 30 10 3)</span>\n<span class="cm">; map applies each function to (10, 3)</span>\n\n(<span class="kw">define</span> preds (<span class="fn">list</span> even? odd? positive? zero?))\n(<span class="fn">map</span> (<span class="kw">lambda</span> (p) (p <span class="num">4</span>)) preds)\n<span class="cm">; => (true false true false)</span>\n<span class="cm">; 4 is even, not odd, positive, not zero</span>\n\n<span class="cm">;; Apply all predicates and check if ALL pass:</span>\n(<span class="kw">define</span> (<span class="fn">all-pass?</span> preds val)\n  (<span class="fn">andmap</span> (<span class="kw">lambda</span> (p) (p val)) preds))\n\n<span class="cm">;; Apply all functions and collect results:</span>\n(<span class="kw">define</span> (<span class="fn">apply-all</span> fns val)\n  (<span class="fn">map</span> (<span class="kw">lambda</span> (f) (f val)) fns))'
+    }
+  ],
+  examples: [
+    {
+      title: 'compose: evaluation trace',
+      steps: [
+        { math: '(define not-even? (compose not even?))', explain: 'compose not even?: creates a function that applies even? first, then not. So it returns true for ODD numbers.' },
+        { math: '(not-even? 4)\n=> ((compose not even?) 4)\n=> ((lambda (x) (not (even? x))) 4)', explain: 'compose produced (lambda (x) (not (even? x))). Apply to 4.' },
+        { math: '=> (not (even? 4))\n=> (not true)\n=> false', explain: '4 is even, so even? returns true. not(true) = false. So not-even? correctly identifies 4 as not odd.' },
+        { math: '(not-even? 7) => (not (even? 7)) => (not false) => true', explain: '7 is not even, so even? returns false. not(false) = true. not-even? correctly returns true for 7.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'What does (compose sqr add1) produce?', opts: ['A number', 'A function that first squares its argument, then adds 1', 'A function that first adds 1, then squares the result', 'The sum of sqr and add1'], ans: 2, exp: '(compose f g) applies g FIRST, then f. So (compose sqr add1): g=add1 runs first (add1(x)), then f=sqr runs on the result (sqr(add1(x))). For input 4: add1(4)=5, sqr(5)=25.' },
+    { q: 'Evaluate: (apply-twice (lambda (x) (* x 3)) 2)', opts: ['6', '18', '12', '8'], ans: 1, exp: 'apply-twice applies f twice: f(f(2)). f(2) = (* 2 3) = 6. f(6) = (* 6 3) = 18.' },
+    { q: 'The contract (X -> Bool) means:', opts: ['A function that returns X or Bool', 'A list containing X and Bool', 'A function that takes a value of type X and returns a boolean', 'X is equal to Bool'], ans: 2, exp: '(X -> Bool) is a function type: takes X, produces Bool. X is a type variable — it can be any type. filter takes (X -> Bool), meaning a predicate that works on whatever type is in the list.' },
+    { q: 'If fns = (list sqr add1 sub1), what does (map (lambda (f) (f 5)) fns) produce?', opts: ["'(25 6 4)", "'(5 5 5)", "'(10 6 4)", 'Error — cannot map over a list of functions'], ans: 0, exp: 'map applies (lambda (f) (f 5)) to each function in fns: (sqr 5)=25, (add1 5)=6, (sub1 5)=4. Result: (list 25 6 4). Functions are first-class — they can be list elements and passed to map.' },
+    { q: 'What does (compose not even?) do to odd numbers?', opts: ['Returns false for all odd numbers', 'Returns true for all odd numbers (since they are NOT even)', 'Returns the number itself', 'Produces an error on odd numbers'], ans: 1, exp: '(compose not even?) = (lambda (x) (not (even? x))). For odd numbers: even? returns false, not(false) = true. This function is equivalent to odd?.' }
+  ]
+};
+
+LESSONS['absfns'] = {
+  title: 'L19: Abstract List Functions',
+  intro: 'The five abstract list functions — filter, build-list, map, foldr, foldl — appear on every CS 135 final exam. "Without recursion" problems require combining these instead of writing recursive code. foldr is the most powerful and most tested. Master all five cold, especially foldr vs foldl.',
+  concepts: [
+    {
+      title: 'The Five Abstract List Functions',
+      body: '<span class="cm">;; 1. filter: keep elements matching predicate</span>\n<span class="cm">;; filter: (X -> Bool) (listof X) -> (listof X)</span>\n(<span class="fn">filter</span> even? (list <span class="num">1 2 3 4 5 6</span>))    <span class="cm">; => (2 4 6)</span>\n(<span class="fn">filter</span> positive? (list -1 2 -3 4))   <span class="cm">; => (2 4)</span>\n\n<span class="cm">;; 2. build-list: build a list by applying f to 0,1,...,n-1</span>\n<span class="cm">;; build-list: Nat (Nat -> X) -> (listof X)</span>\n(<span class="fn">build-list</span> <span class="num">5</span> identity)    <span class="cm">; => (0 1 2 3 4)</span>\n(<span class="fn">build-list</span> <span class="num">4</span> sqr)         <span class="cm">; => (0 1 4 9)</span>\n\n<span class="cm">;; 3. map: transform every element</span>\n<span class="cm">;; map: (X -> Y) (listof X) -> (listof Y)</span>\n(<span class="fn">map</span> add1 (list <span class="num">1 2 3</span>))    <span class="cm">; => (2 3 4)</span>\n(<span class="fn">map</span> (<span class="kw">lambda</span> (x) (* x x)) (list <span class="num">1 2 3 4</span>))  <span class="cm">; => (1 4 9 16)</span>\n\n<span class="cm">;; 4. foldr: combine right to left</span>\n<span class="cm">;; foldr: (X Y -> Y) Y (listof X) -> Y</span>\n(<span class="fn">foldr</span> + <span class="num">0</span> (list <span class="num">1 2 3</span>))   <span class="cm">; => 6</span>\n\n<span class="cm">;; 5. foldl: combine left to right</span>\n<span class="cm">;; foldl: (X Y -> Y) Y (listof X) -> Y</span>\n(<span class="fn">foldl</span> + <span class="num">0</span> (list <span class="num">1 2 3</span>))   <span class="cm">; => 6  (same for +)</span>'
+    },
+    {
+      title: 'foldr: The Most Important Function',
+      body: 'FOLDR unrolls a list right-to-left, inserting the combining function between elements.\n\n<span class="cm">;; (foldr f base (list x1 x2 x3))</span>\n<span class="cm">;; => (f x1 (f x2 (f x3 base)))</span>\n<span class="cm">;; Think: "insert f between each element, right to left, base at end"</span>\n\n(<span class="fn">foldr</span> + <span class="num">0</span> (list <span class="num">1 2 3</span>))\n=> (+ <span class="num">1</span> (+ <span class="num">2</span> (+ <span class="num">3</span> <span class="num">0</span>)))\n=> (+ <span class="num">1</span> (+ <span class="num">2</span> <span class="num">3</span>))\n=> (+ <span class="num">1</span> <span class="num">5</span>) => <span class="num">6</span>\n\n(<span class="fn">foldr</span> cons empty (list <span class="num">1 2 3</span>))\n=> (cons <span class="num">1</span> (cons <span class="num">2</span> (cons <span class="num">3</span> empty)))\n=> (list <span class="num">1 2 3</span>)   <span class="cm">; copies the list!</span>\n\n(<span class="fn">foldr</span> * <span class="num">1</span> (list <span class="num">1 2 3 4</span>))\n=> (* <span class="num">1</span> (* <span class="num">2</span> (* <span class="num">3</span> (* <span class="num">4</span> <span class="num">1</span>))))\n=> <span class="num">24</span>\n\n<span class="cm">;; The base case is the IDENTITY for the operation:</span>\n<span class="cm">;; + -> 0, * -> 1, cons -> empty, and -> true, or -> false</span>'
+    },
+    {
+      title: 'foldr vs foldl: Key Differences',
+      body: '<span class="cm">;; foldr: RIGHT to LEFT</span>\n<span class="cm">;; (foldr f base (x1 x2 x3))</span>\n<span class="cm">;; = (f x1 (f x2 (f x3 base)))   ; x1 is outermost</span>\n\n<span class="cm">;; foldl: LEFT to RIGHT</span>\n<span class="cm">;; (foldl f base (x1 x2 x3))</span>\n<span class="cm">;; = (f x3 (f x2 (f x1 base)))   ; x3 is outermost</span>\n\n<span class="cm">;; For commutative ops (+ *): same result</span>\n(<span class="fn">foldr</span> + <span class="num">0</span> (list <span class="num">1 2 3</span>))  <span class="cm">; => 6</span>\n(<span class="fn">foldl</span> + <span class="num">0</span> (list <span class="num">1 2 3</span>))  <span class="cm">; => 6  (same!)</span>\n\n<span class="cm">;; For non-commutative ops (cons): DIFFERENT result!</span>\n(<span class="fn">foldr</span> cons empty (list <span class="num">1 2 3</span>))  <span class="cm">; => (1 2 3)  preserves order</span>\n(<span class="fn">foldl</span> cons empty (list <span class="num">1 2 3</span>))  <span class="cm">; => (3 2 1)  REVERSED!</span>\n\n<span class="cm">;; foldl cons = reverse! Memorize this.</span>'
+    },
+    {
+      title: 'Implementing map and filter using foldr',
+      body: 'THIS APPEARS ON EXAMS. Know it cold.\n\n<span class="cm">;; my-map using foldr:</span>\n<span class="cm">;; The lambda takes (x acc) where x = current element, acc = mapped rest</span>\n(<span class="kw">define</span> (<span class="fn">my-map</span> f lst)\n  (<span class="fn">foldr</span> (<span class="kw">lambda</span> (x acc) (<span class="fn">cons</span> (f x) acc))\n         empty lst))\n<span class="cm">;; For each element x: apply f, then prepend result to acc</span>\n\n<span class="cm">;; my-filter using foldr:</span>\n(<span class="kw">define</span> (<span class="fn">my-filter</span> pred? lst)\n  (<span class="fn">foldr</span> (<span class="kw">lambda</span> (x acc)\n           (<span class="kw">cond</span> [(pred? x) (<span class="fn">cons</span> x acc)]  <span class="cm">; keep it</span>\n                 [<span class="kw">else</span> acc]))              <span class="cm">; skip it</span>\n         empty lst))\n\n(<span class="fn">my-map</span> add1 (list <span class="num">0 1 2 3</span>))       <span class="cm">; => (1 2 3 4)</span>\n(<span class="fn">my-filter</span> even? (list <span class="num">1 2 3 4 5</span>)) <span class="cm">; => (2 4)</span>'
+    },
+    {
+      title: 'Combining Abstract List Functions',
+      body: 'Most exam questions combine 2 or more functions. Think of it as a PIPELINE.\n\nStrategy: filter (keep what you want) -> map (transform) -> fold (combine)\n\n<span class="cm">;; Sum of squares of even numbers:</span>\n(<span class="kw">define</span> (<span class="fn">sum-sq-evens</span> lst)\n  (<span class="fn">foldr</span> + <span class="num">0</span>\n    (<span class="fn">map</span> <span class="fn">sqr</span>\n      (<span class="fn">filter</span> even? lst))))\n\n(<span class="fn">sum-sq-evens</span> (list <span class="num">1 2 3 4 5</span>))\n=> (<span class="fn">foldr</span> + <span class="num">0</span> (<span class="fn">map</span> <span class="fn">sqr</span> (list <span class="num">2 4</span>)))\n=> (<span class="fn">foldr</span> + <span class="num">0</span> (list <span class="num">4 16</span>))\n=> <span class="num">20</span>\n\n<span class="cm">;; Build list of even numbers from 0 to 2(n-1):</span>\n(<span class="fn">build-list</span> n (<span class="kw">lambda</span> (i) (* <span class="num">2</span> i)))\n<span class="cm">; => (0 2 4 ... 2(n-1))</span>\n\n<span class="cm">;; Count elements matching predicate (without recursion):</span>\n(<span class="kw">define</span> (<span class="fn">count-if</span> pred? lst)\n  (<span class="fn">length</span> (<span class="fn">filter</span> pred? lst)))'
+    }
+  ],
+  examples: [
+    {
+      title: 'foldr trace: (foldr + 0 (list 1 2 3))',
+      steps: [
+        { math: '(foldr + 0 (list 1 2 3))', explain: 'foldr with + as combiner, 0 as base, list (1 2 3). Unroll right to left.' },
+        { math: '= (+ 1 (foldr + 0 (list 2 3)))', explain: 'Take first element (1), combine it with the result of folding the rest.' },
+        { math: '= (+ 1 (+ 2 (foldr + 0 (list 3))))', explain: 'Take next element (2), combine with result of folding (list 3).' },
+        { math: '= (+ 1 (+ 2 (+ 3 0)))', explain: 'Take last element (3), combine with base 0.' },
+        { math: '= (+ 1 (+ 2 3)) = (+ 1 5) = 6', explain: 'Evaluate inside out: 3+0=3, 2+3=5, 1+5=6. The base (0) is the identity for addition.' }
+      ]
+    },
+    {
+      title: 'my-map using foldr',
+      steps: [
+        { math: '(my-map sqr (list 1 2 3))\n= (foldr (lambda (x acc) (cons (sqr x) acc)) empty (list 1 2 3))', explain: 'my-map with sqr. The combining lambda: for each element x, cons (sqr x) onto acc.' },
+        { math: '= (cons (sqr 1) (foldr ... empty (list 2 3)))\n= (cons 1 ...)', explain: 'First step: sqr(1)=1, cons it onto the rest.' },
+        { math: '= (cons 1 (cons (sqr 2) (foldr ... empty (list 3))))\n= (cons 1 (cons 4 ...))', explain: 'Second step: sqr(2)=4, cons it.' },
+        { math: '= (cons 1 (cons 4 (cons (sqr 3) empty)))\n= (cons 1 (cons 4 (cons 9 empty)))\n= (list 1 4 9)', explain: 'Final step: sqr(3)=9, cons onto empty. Build up: (1 4 9). This is exactly map sqr!' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'What does (build-list 4 identity) produce?', opts: ["'(0 1 2 3)", "'(1 2 3 4)", "'(0 0 0 0)", 'An error'], ans: 0, exp: 'build-list calls f on each number from 0 to n-1. With identity (which returns its argument), we get (identity 0), (identity 1), (identity 2), (identity 3) = (0 1 2 3).' },
+    { q: 'What does (foldl cons empty (list 1 2 3)) produce?', opts: ["'(1 2 3)", "'(3 2 1)", '6', 'empty'], ans: 1, exp: 'foldl processes LEFT to RIGHT: first (cons 1 empty)=(list 1), then (cons 2 (list 1))=(list 2 1), then (cons 3 (list 2 1))=(list 3 2 1). foldl cons = reverse. This is a key fact to memorize.' },
+    { q: 'What is the base case for (foldr * 1 lst)?', opts: ['0', '1', 'empty', 'false'], ans: 1, exp: '1 is the identity element for multiplication (x*1=x). When the list is empty, foldr returns the base case. So (foldr * 1 empty) = 1 (the product of zero numbers is 1, like the empty product).' },
+    { q: 'Write "count even numbers in lst" without recursion:', opts: ['(length (filter even? lst))', '(foldr + 0 (filter even? lst))', '(map even? lst)', '(build-list (length lst) even?)'], ans: 0, exp: '(filter even? lst) keeps only even numbers. (length ...) counts them. So (length (filter even? lst)) is the count of even numbers. (foldr + 0 ...) would SUM the even numbers, not count them.' },
+    { q: 'In (foldr f base (list x1 x2 x3)), which element is in the OUTERMOST call?', opts: ['x3 (rightmost)', 'x1 (leftmost)', 'base', 'The element at the middle'], ans: 1, exp: 'foldr = right fold. Unrolled: (f x1 (f x2 (f x3 base))). x1 is outermost — it is processed LAST as the recursion unwinds. x3 is combined with base first. Despite being called "right fold," x1 ends up in the outermost position.' },
+    { q: '(foldr (lambda (x acc) (cons (* x 2) acc)) empty (list 1 2 3)) produces:', opts: ["'(2 4 6)", "'(6 4 2)", "'(1 2 3)", '6'], ans: 0, exp: 'This is my-map with (lambda (x) (* x 2)). For each x, double it and cons onto acc. foldr preserves order, so (1 2 3) becomes (2 4 6). Result: (list 2 4 6).' }
+  ]
+};
+
+LESSONS['graphs'] = {
+  title: 'L20: Directed Graphs and Backtracking',
+  intro: 'A directed graph has nodes connected by directed edges (arrows). In Racket, graphs are represented as adjacency lists. The key algorithm is find-path: finding a path between two nodes using backtracking. When the graph has cycles, we add a "seen" accumulator to avoid infinite loops.',
+  concepts: [
+    {
+      title: 'Directed Graphs: Terminology',
+      body: 'A directed graph (digraph) has NODES (vertices) and EDGES (directed arrows).\n\nGiven edge (v, w):\n  - w is an OUT-NEIGHBOUR of v\n  - v is an IN-NEIGHBOUR of w\n  - There is an arrow FROM v TO w\n\nA PATH from v1 to vk: sequence v1, v2, ..., vk where each (vi, vi+1) is an edge.\nPath LENGTH: number of edges = k-1.\n\nA CYCLE: a path where the first and last node are the same (v1 = vk).\n\nA DAG (Directed Acyclic Graph): no cycles.\n\nCS 135 only uses directed graphs (not undirected).\nBinary trees are a special case: DAGs where each node has at most 2 out-neighbours.'
+    },
+    {
+      title: 'Adjacency List Representation',
+      body: 'A graph = a list of pairs: (node-name (list-of-out-neighbours))\n\n(<span class="kw">define</span> g1\n  (list (<span class="fn">list</span> <span class="sym">\'A</span> (list <span class="sym">\'B \'C</span>))   <span class="cm">; A -> B and A -> C</span>\n        (<span class="fn">list</span> <span class="sym">\'B</span> (list <span class="sym">\'D</span>))     <span class="cm">; B -> D</span>\n        (<span class="fn">list</span> <span class="sym">\'C</span> (list <span class="sym">\'D</span>))     <span class="cm">; C -> D</span>\n        (<span class="fn">list</span> <span class="sym">\'D</span> empty)))       <span class="cm">; D has no out-neighbours</span>\n\n<span class="cm">;; This represents: A -> B -> D\n;;                  A -> C -> D</span>\n\n<span class="cm">;; Helper to get out-neighbours of a node:</span>\n(<span class="kw">define</span> (<span class="fn">neighbours</span> node g)\n  (<span class="fn">second</span> (<span class="fn">assoc</span> node g)))\n\n(<span class="fn">neighbours</span> <span class="sym">\'A</span> g1)   <span class="cm">; => (list B C)</span>\n(<span class="fn">neighbours</span> <span class="sym">\'D</span> g1)   <span class="cm">; => empty</span>'
+    },
+    {
+      title: 'find-path on a DAG',
+      body: '(<span class="kw">define</span> (<span class="fn">find-path</span> orig dest g)\n  (<span class="kw">cond</span>\n    [(<span class="fn">symbol=?</span> orig dest) (<span class="fn">list</span> dest)]   <span class="cm">; FOUND! path = just the dest</span>\n    [<span class="kw">else</span>\n     (<span class="kw">local</span>\n       [(<span class="kw">define</span> path\n          (<span class="fn">fp-list</span> (<span class="fn">neighbours</span> orig g) dest g))]\n       (<span class="kw">cond</span>\n         [(<span class="fn">empty?</span> path) empty]        <span class="cm">; no path from any neighbour</span>\n         [<span class="kw">else</span> (<span class="fn">cons</span> orig path)]))])) <span class="cm">; prepend orig to path found</span>\n\n(<span class="kw">define</span> (<span class="fn">fp-list</span> nbrs dest g)\n  (<span class="kw">cond</span>\n    [(<span class="fn">empty?</span> nbrs) empty]            <span class="cm">; no more neighbours to try</span>\n    [<span class="kw">else</span>\n     (<span class="kw">local</span>\n       [(<span class="kw">define</span> path\n          (<span class="fn">find-path</span> (<span class="fn">first</span> nbrs) dest g))]\n       (<span class="kw">cond</span>\n         [(<span class="fn">empty?</span> path)              <span class="cm">; this neighbour failed</span>\n          (<span class="fn">fp-list</span> (<span class="fn">rest</span> nbrs) dest g)]  <span class="cm">; backtrack! try next</span>\n         [<span class="kw">else</span> path])])]) <span class="cm">; success!</span>'
+    },
+    {
+      title: 'Backtracking: What It Means',
+      body: 'BACKTRACKING: try a path, if it fails, back up and try a different option.\n\nIn fp-list: we try the FIRST neighbour.\nIf find-path returns empty (dead end), we BACK UP and try (rest nbrs).\n\nExample: find path from A to H in this graph:\n  A -> C, D, E\n  C -> (no neighbours)\n  D -> F, J\n  F -> K, H\n  H -> (no neighbours)\n\nTrace:\n  find-path A H:\n    try A->C: (find-path C H) -> C has no neighbours -> empty (BACKTRACK)\n    try A->D: (find-path D H)\n      try D->F: (find-path F H)\n        try F->K: (find-path K H) -> K has no neighbours -> empty (BACKTRACK)\n        try F->H: (find-path H H) -> H = H -> (list H) SUCCESS!\n        return (list H)\n      return (cons F (list H)) = (list F H)\n    return (cons D (list F H)) = (list D F H)\n  return (cons A (list D F H)) = (list A D F H)'
+    },
+    {
+      title: 'Handling Cycles: The Visited Accumulator',
+      body: 'If the graph has cycles, find-path can loop forever. Solution: track visited nodes.\n\n(<span class="kw">define</span> (<span class="fn">find-path/acc</span> orig dest g seen)\n  (<span class="kw">cond</span>\n    [(<span class="fn">symbol=?</span> orig dest) (<span class="fn">list</span> dest)]\n    [<span class="kw">else</span>\n     (<span class="kw">local</span>\n       [(<span class="kw">define</span> nbrs (<span class="fn">neighbours</span> orig g))\n        (<span class="kw">define</span> path (<span class="fn">fp-list/acc</span> nbrs dest g (<span class="fn">cons</span> orig seen)))]\n       (<span class="kw">cond</span> [(<span class="fn">empty?</span> path) empty]\n             [<span class="kw">else</span> (<span class="fn">cons</span> orig path)]))]))\n\n(<span class="kw">define</span> (<span class="fn">fp-list/acc</span> nbrs dest g seen)\n  (<span class="kw">cond</span>\n    [(<span class="fn">empty?</span> nbrs) empty]\n    [(<span class="fn">member</span> (<span class="fn">first</span> nbrs) seen)        <span class="cm">; already visited! SKIP</span>\n     (<span class="fn">fp-list/acc</span> (<span class="fn">rest</span> nbrs) dest g seen)]\n    [<span class="kw">else</span>\n     (<span class="kw">local</span>\n       [(<span class="kw">define</span> path (<span class="fn">find-path/acc</span> (<span class="fn">first</span> nbrs) dest g seen))]\n       (<span class="kw">cond</span> [(<span class="fn">empty?</span> path) (<span class="fn">fp-list/acc</span> (<span class="fn">rest</span> nbrs) dest g seen)]\n             [<span class="kw">else</span> path]))]))\n\n<span class="cm">;; seen starts as empty. We add orig before recursing.</span>\n<span class="cm">;; If a neighbour is in seen, we skip it to prevent infinite loops.</span>'
+    }
+  ],
+  examples: [
+    {
+      title: 'find-path trace on a simple DAG',
+      steps: [
+        { math: "(define g '((A (B C)) (B (D)) (C ()) (D ())))\n(find-path 'A 'D g)", explain: 'Find path from A to D. Graph: A has neighbours B and C. B has neighbour D. C and D have no neighbours.' },
+        { math: "A != D. neighbours of A = '(B C)\nTry (find-path 'B 'D g)", explain: 'A is not D. Get neighbours of A: (B C). Try first neighbour B.' },
+        { math: "B != D. neighbours of B = '(D)\nTry (find-path 'D 'D g)\n=> D = D! Return '(D)", explain: 'B is not D. Get neighbours of B: (D). Try D. D equals dest D! Return (list D).' },
+        { math: "fp-list returns '(D)\nfind-path B: (cons 'B '(D)) = '(B D)\nfind-path A: (cons 'A '(B D)) = '(A B D)", explain: 'Unwind: B found path (B D). A prepends itself: (A B D). We never tried C because B succeeded.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: "In the adjacency list '((A (B C)) (B ())), what does A have?", opts: ['A has in-neighbours B and C', 'A has out-neighbours B and C (A->B and A->C)', 'A has no neighbours', 'A and B both point to C'], ans: 1, exp: 'In (node-name (list-of-out-neighbours)), (A (B C)) means A has out-neighbours B and C. There are directed edges A->B and A->C. B is a DESTINATION from A, not a source.' },
+    { q: 'What does backtracking mean in find-path?', opts: ['Going backwards through the path found', 'When a path attempt fails, returning empty and trying the next neighbour', 'Reversing the graph and searching again', 'Removing already-visited nodes'], ans: 1, exp: 'Backtracking: when find-path(neighbour) returns empty (dead end), fp-list returns to try the NEXT neighbour. It "backs up" to the previous choice point and makes a different choice. This exhaustively tries all paths.' },
+    { q: 'Why do we need a "seen" list when graphs have cycles?', opts: ['To make the algorithm faster', 'To prevent infinite loops by not visiting the same node twice on a path', 'To remember the path found so far', 'To count the number of paths'], ans: 1, exp: 'Without seen, find-path on A->B->A->B->... cycles forever. The seen list records which nodes we have already visited on the CURRENT path. If we would visit a seen node again, we skip it, breaking the cycle.' },
+    { q: 'What does find-path return when no path exists?', opts: ['false', '0', 'empty', 'An error message'], ans: 2, exp: 'By convention, find-path returns empty when no path from orig to dest exists. Callers check (empty? path) to detect failure. This is consistent: a successful path is a non-empty list of nodes.' },
+    { q: 'A DAG is:', opts: ['Any directed graph with nodes and edges', 'A directed graph with no cycles', 'A directed graph where every node has exactly one out-neighbour', 'A binary tree stored as a graph'], ans: 1, exp: 'DAG = Directed Acyclic Graph. Directed: edges have direction. Acyclic: no cycles. You cannot start at a node and return to it by following edges. Binary trees are a special case of DAGs.' }
+  ]
+};
+
+LESSONS['random'] = {
+  title: 'L21: Randomness',
+  intro: 'L21 covers how computers generate random (or random-looking) numbers. This is a lighter lecture — mostly conceptual. The key distinction is true randomness vs pseudorandomness. On exams, questions from this lecture are usually conceptual multiple-choice, not code-writing.',
+  concepts: [
+    {
+      title: 'True Randomness vs Pseudorandomness',
+      body: 'TRUE RANDOMNESS: genuinely unpredictable, not determined by any prior state.\n  - Sources: quantum effects, thermal noise, hardware RNG (/dev/random on Linux/Mac)\n  - Slow and inconvenient for general use\n  - Required for cryptography and security\n\nPSEUDORANDOMNESS: LOOKS random but is actually deterministic.\n  - Generated by a mathematical formula from an initial "seed"\n  - Repeatable: same seed -> same sequence of numbers\n  - Fast and good enough for games and simulations\n  - NOT suitable for cryptographic applications\n\nIn Racket: (random n) gives a pseudorandom integer from 0 to n-1.\n  (random 6)   => could be 0, 1, 2, 3, 4, or 5  (simulates a die)'
+    },
+    {
+      title: 'Pseudorandom Number Generators (PRNGs)',
+      body: 'A PRNG is a function from STATE to (new-state, random-number).\n\n<span class="cm">;; prng: State -> (list State Nat)</span>\n\nStarting from seed S0:\n  PRNG(S0) => (S1, R1)\n  PRNG(S1) => (S2, R2)\n  PRNG(S2) => (S3, R3)\n  ...\n\nThe sequence R1, R2, R3, ... is deterministic but appears random.\nOften, the random number IS the new state: Si = Ri.\n\nHistorical example: Middle-Square Method (John von Neumann, 1949)\n<span class="cm">;; Square the previous number, take the middle 4 digits</span>\n(<span class="kw">define</span> (<span class="fn">middle-square-4</span> n)\n  (<span class="fn">quotient</span> (<span class="fn">remainder</span> (<span class="fn">sqr</span> n) <span class="num">1000000</span>) <span class="num">100</span>))\n\n<span class="cm">;; Example: start with 1234</span>\n<span class="cm">;; sqr(1234) = 1522756 -> take middle 4: 5227</span>\n<span class="cm">;; sqr(5227) = 27321529 -> middle 4: 3215</span>\n<span class="cm">;; ...(sequence continues, eventually repeats)</span>'
+    },
+    {
+      title: 'Using random in Racket',
+      body: '(<span class="fn">random</span> n)  gives a uniformly random integer in [0, n-1]\n\n<span class="cm">;; Simulate a coin flip:</span>\n(<span class="kw">define</span> (<span class="fn">coin-flip</span>)\n  (<span class="fn">random</span> <span class="num">2</span>))   <span class="cm">; 0 or 1, equally likely</span>\n\n<span class="cm">;; Simulate a 6-sided die:</span>\n(<span class="kw">define</span> (<span class="fn">roll-die</span>)\n  (+ <span class="num">1</span> (<span class="fn">random</span> <span class="num">6</span>)))  <span class="cm">; 1 through 6</span>\n\n<span class="cm">;; Pick random element from list:</span>\n(<span class="kw">define</span> (<span class="fn">random-element</span> lst)\n  (<span class="fn">list-ref</span> lst (<span class="fn">random</span> (<span class="fn">length</span> lst))))\n\nIMPORTANT: Do NOT write your own PRNG for cryptographic or security purposes.\nModern cryptographic PRNGs (like ChaCha20) are extremely complex and require\nspecialized mathematical knowledge. Use established libraries instead.'
+    },
+    {
+      title: 'Stochastic Simulations',
+      body: 'A STOCHASTIC simulation uses randomness to model probabilistic systems.\n\nExample: estimating the probability that a random point falls inside a circle\n(Monte Carlo method for estimating pi).\n\n<span class="cm">;; Is a random point (x, y) in the unit circle?</span>\n(<span class="kw">define</span> (<span class="fn">in-circle?</span> x y)\n  (<= (+ (<span class="fn">sqr</span> x) (<span class="fn">sqr</span> y)) <span class="num">1</span>))\n\n<span class="cm">;; Run n trials, count hits</span>\n(<span class="kw">define</span> (<span class="fn">monte-carlo</span> n)\n  (<span class="kw">local</span>\n    [(<span class="kw">define</span> (<span class="fn">trial</span> i acc)\n       (<span class="kw">cond</span> [(= i <span class="num">0</span>) acc]\n             [<span class="kw">else</span>\n              (<span class="kw">local</span> [(define x (/ (random 1000) 1000.0))\n                       (define y (/ (random 1000) 1000.0))]\n                (<span class="fn">trial</span> (- i <span class="num">1</span>)\n                         (+ acc (<span class="kw">if</span> (<span class="fn">in-circle?</span> x y) <span class="num">1</span> <span class="num">0</span>))))]))]\n    (* <span class="num">4.0</span> (/ (<span class="fn">trial</span> n <span class="num">0</span>) n))))'
+    }
+  ],
+  examples: [
+    {
+      title: 'True random vs pseudorandom',
+      steps: [
+        { math: 'TRUE RANDOM:\n(random-source: /dev/random or HRNG)\n- Each number is genuinely unpredictable\n- Cannot be reproduced from seed\n- Slow, limited bandwidth\n- Required for: encryption keys, passwords', explain: 'True randomness comes from physical processes: radioactive decay, thermal noise, quantum effects. It is genuinely unpredictable and cannot be reproduced.' },
+        { math: 'PSEUDORANDOM (what Racket uses):\n(random 6)  ; uses internal PRNG\n\n(random-seed 42)\n(random 6)  => 3\n(random 6)  => 1\n(random-seed 42)  ; reset to same seed\n(random 6)  => 3  ; same sequence!', explain: 'Pseudorandomness is deterministic. Same seed = same sequence. This is a feature (reproducible tests) and a bug (predictable to attackers). Never use for cryptography.' },
+        { math: 'FOR GAMES AND SIMULATIONS: pseudorandom is fine\nFOR CRYPTOGRAPHY: must use true random or\n                  cryptographically secure PRNG', explain: 'The choice depends on the use case. For a dice game or simulation, statistical properties of pseudorandomness are sufficient. For generating encryption keys, the predictability of PRNGs is catastrophic.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'What is the key difference between true randomness and pseudorandomness?', opts: ['True randomness is faster', 'Pseudorandomness is deterministic — generated by a formula from a seed; true randomness is genuinely unpredictable', 'Pseudorandomness requires hardware', 'True randomness always produces the same sequence'], ans: 1, exp: 'Pseudorandomness: deterministic algorithm produces numbers that appear random. Same seed = same sequence. True randomness: physically unpredictable (quantum, thermal noise). Same "seed" does not reproduce the same sequence.' },
+    { q: 'What does (random 6) return in Racket?', opts: ['A random real number between 0 and 6', 'A random integer from 1 to 6', 'A random integer from 0 to 5 (inclusive)', 'Always 3'], ans: 2, exp: '(random n) returns a uniformly random integer from 0 to n-1 inclusive. So (random 6) returns one of: 0, 1, 2, 3, 4, 5. To simulate a die (1-6): (+ 1 (random 6)).' },
+    { q: 'Should you write your own PRNG for cryptographic purposes?', opts: ['Yes, it is good practice', 'Yes, if you use the middle-square method', 'No — use established cryptographic libraries', 'Yes, as long as the seed is secret'], ans: 2, exp: 'NO! Cryptographically secure PRNGs require sophisticated mathematics. Naive PRNGs (like middle-square) have predictable patterns that attackers exploit. Always use vetted cryptographic libraries.' },
+    { q: 'A PRNG takes a STATE (seed) and produces:', opts: ['Just a random number', 'A new state and a random number', 'A list of random numbers', 'A boolean indicating randomness'], ans: 1, exp: 'A PRNG function: State -> (list State Nat). It takes the current state and produces BOTH a new state (for the next call) and a pseudorandom number. The sequence is generated by chaining these calls together.' }
+  ]
+};
+
+LESSONS['history'] = {
+  title: 'L22: History of Computing',
+  intro: 'History questions on CS 135 finals are essentially FREE MARKS — pure memorization. There are roughly 9 multiple-choice questions on history. Every single one is answerable from this lesson. Spend 30 minutes here and collect all of them.',
+  concepts: [
+    {
+      title: 'Al-Khwarizmi: The Word "Algorithm"',
+      body: 'Muhammad ibn Musa AL-KHWARIZMI (c. 780-850 CE)\nPersian mathematician and scholar.\n\nHe wrote a landmark book on algebra and arithmetic.\nThe word ALGORITHM derives from the Latin transliteration of his name: "Algoritmi."\nThe word ALGEBRA comes from the title of his book: "al-jabr" (al-Kitab al-mukhtasar fi hisab al-jabr wal-muqabala).\n\nKEY FACT: algorithm <- al-Khwarizmi'
+    },
+    {
+      title: 'Ada Lovelace: First Programmer',
+      body: 'ADA BYRON (LOVELACE) (1815-1852)\nBritish mathematician, daughter of poet Lord Byron.\n\nShe worked with Charles Babbage on his Analytical Engine (a proposed mechanical computer).\nShe wrote what is considered the FIRST algorithm intended to be processed by a machine:\na method for computing Bernoulli numbers.\nShe recognized the engine could manipulate any symbols, not just numbers.\n\nOften called "the world\'s first computer programmer."\n\nKEY FACT: Ada Lovelace -> first programmer'
+    },
+    {
+      title: 'Kurt Godel: Incompleteness Theorems',
+      body: 'KURT GODEL (1906-1978)\nAustrian-American mathematician.\n\nIn 1931, he proved the INCOMPLETENESS THEOREMS:\nAny sufficiently powerful, consistent formal system of mathematics is INCOMPLETE:\nThere exist true statements it cannot prove.\nOR, if it can prove everything, it contains contradictions (is inconsistent).\n\nGodel encoded mathematical statements as numbers to create self-referential paradoxes.\nThis shattered the dream of a complete mathematical foundation.\nHis work directly influenced Church and Turing.\n\nKEY FACT: Godel -> incompleteness theorems'
+    },
+    {
+      title: 'Alonzo Church: Lambda Calculus',
+      body: 'ALONZO CHURCH (1903-1995)\nAmerican mathematician at Princeton.\n\nIn the 1930s, invented the LAMBDA CALCULUS as a formal model of computation.\nIn 1936, proved there is NO algorithm to determine if two lambda expressions are equivalent.\nThis was one of the first proofs of an undecidable problem.\n\nAlan Turing studied under Church at Princeton (1936-1939).\n\nThe LAMBDA keyword in Racket, Python, JavaScript, etc. traces directly to Church.\nLisp (and thus Racket) inherits lambda from Church\'s work.\n\nKEY FACT: Alonzo Church -> lambda calculus -> influenced McCarthy/Lisp -> Racket'
+    },
+    {
+      title: 'Alan Turing: Halting Problem + Turing Machine',
+      body: 'ALAN TURING (1912-1954)\nBritish mathematician.\n\nIn 1936 (independently of Church), developed the TURING MACHINE as a model of computation.\nProved the HALTING PROBLEM is undecidable:\n  "There is no general algorithm that can determine\n   whether any given program will halt or run forever."\n\nStudied under Church at Princeton (PhD 1939).\nDuring WWII: led the team that broke the German Enigma cipher.\nProposed the TURING TEST (1950): can a machine convince a human it is human?\nThe TURING AWARD is the highest honor in Computer Science ("the Nobel Prize of CS").\nDied 1954.\n\nKEY FACTS: Turing -> halting problem (undecidable), Turing machine, Turing Award, Turing Test'
+    },
+    {
+      title: 'Church-Turing Thesis',
+      body: 'Church and Turing independently developed their models in 1936.\nTuring quickly proved the two models are EQUIVALENT.\n\nTHE CHURCH-TURING THESIS:\n"Any reasonable and general model of computation is equivalent (in what it can compute) to a Turing machine."\n\nA programming language is TURING COMPLETE if it can compute anything a Turing machine can.\nRacket is Turing complete.\n\nKEY FACT: Church-Turing -> all reasonable models are equivalent in power'
+    },
+    {
+      title: 'John McCarthy: Lisp',
+      body: 'JOHN McCARTHY (1927-2011)\nAmerican computer scientist, MIT then Stanford.\nAI researcher.\n\nIn 1958, designed and implemented LISP (LISt Processor).\nLisp was directly inspired by CHURCH\'S LAMBDA CALCULUS.\nLisp introduced: functions as first-class values, the lambda keyword,\n               garbage collection, recursive list processing (cons, car, cdr).\n\nLISP -> SCHEME (Sussman & Steele, 1975) -> RACKET\nSo Racket is a direct descendant of McCarthy\'s Lisp.\n\nKEY FACTS: McCarthy -> Lisp (1958); Lisp -> Scheme -> Racket'
+    },
+    {
+      title: 'Grace Hopper: COBOL and Compilers',
+      body: 'GRACE HOPPER (1906-1992)\nAmerican computer scientist and U.S. Navy Admiral.\n\nDeveloped one of the FIRST COMPILERS (a program that translates human-readable code to machine code).\nHer work contributed significantly to COBOL (Common Business-Oriented Language).\nCOBOL is still used in banking systems today.\nPopularized the term "debugging" (literally found a moth stuck in a relay).\n\nKEY FACT: Grace Hopper -> COBOL (and early compiler work)'
+    }
+  ],
+  examples: [
+    {
+      title: 'History timeline: all key people',
+      steps: [
+        { math: 'c. 780-850 CE: Al-Khwarizmi\n  -> word "algorithm" from his name\n  -> word "algebra" from his book title', explain: 'The very word algorithm honors this Persian mathematician. Everything in this course traces back to his foundational work on systematic calculation.' },
+        { math: '1815-1852: Ada Lovelace\n  -> first algorithm for a machine\n  -> worked with Babbage on Analytical Engine', explain: 'Ada recognized that a machine could manipulate any symbols, not just numbers — anticipating general-purpose computing a century early.' },
+        { math: '1931: Kurt Godel\n  -> Incompleteness Theorems\n  -> math cannot be both complete AND consistent', explain: 'Godel proved fundamental limits of formal mathematics. His work inspired Church and Turing to think about what is and is not computable.' },
+        { math: '1936: Alonzo Church -> lambda calculus\n1936: Alan Turing -> Turing machine + halting problem\n  -> Church-Turing: both models are EQUIVALENT', explain: 'Two independent proofs of fundamental limits of computation. Turing studied under Church. Their models are equivalent in power.' },
+        { math: '1958: John McCarthy -> Lisp\n  -> directly from Church\'s lambda calculus\n  -> Lisp -> Scheme -> Racket (your language!)', explain: 'McCarthy turned abstract mathematics into a real programming language. Lambda calculus became lambda in your code.' },
+        { math: '~1959-1960: Grace Hopper -> COBOL\n  -> first compiler concepts\n  -> COBOL still used in banking today', explain: 'Hopper made programming accessible to business users. Her compiler work enabled languages that humans could actually write.' }
+      ]
+    }
+  ],
+  mcq: [
+    { q: 'The word "algorithm" derives from the name of:', opts: ['Euclid', 'Al-Khwarizmi', 'Alan Turing', 'Kurt Godel'], ans: 1, exp: 'The word "algorithm" comes from "Algoritmi," the Latin transliteration of Muhammad ibn Musa al-Khwarizmi (c. 780-850 CE), a Persian mathematician.' },
+    { q: 'Who invented the lambda calculus?', opts: ['Alan Turing', 'John McCarthy', 'Alonzo Church', 'Kurt Godel'], ans: 2, exp: 'Alonzo Church invented the lambda calculus in the 1930s. The lambda keyword in Racket (and Python, JavaScript, etc.) traces directly to his work. Church was also Turing\'s advisor at Princeton.' },
+    { q: 'Who designed the programming language Lisp?', opts: ['Grace Hopper', 'John Backus', 'John McCarthy', 'Guy Steele'], ans: 2, exp: 'John McCarthy created Lisp (LISt Processor) in 1958, directly inspired by Church\'s lambda calculus. Racket descends from Lisp through Scheme: Lisp -> Scheme -> Racket.' },
+    { q: 'Which problem did Alan Turing prove to be undecidable?', opts: ['Whether two lambda expressions are equivalent', 'The halting problem', 'Whether a program is correct', 'Whether a number is prime'], ans: 1, exp: 'Turing proved the halting problem is undecidable: there is no general algorithm that can always determine whether a given program will halt (finish) or run forever on a given input.' },
+    { q: "Grace Hopper's work contributed most significantly to:", opts: ['FORTRAN', 'Lisp', 'COBOL', 'Scheme'], ans: 2, exp: 'Grace Hopper was a key contributor to COBOL (Common Business-Oriented Language) and early compiler technology. COBOL is still used in banking systems today.' },
+    { q: 'Who is often called "the first computer programmer"?', opts: ['Grace Hopper', 'Alan Turing', 'Ada Lovelace', 'Charles Babbage'], ans: 2, exp: 'Ada Byron (Lovelace) is often called the first programmer. She wrote the first algorithm intended to be processed by a machine — for Babbage\'s Analytical Engine — including a method for computing Bernoulli numbers.' },
+    { q: 'The Church-Turing thesis states that:', opts: ['Turing machines are more powerful than lambda calculus', 'Any reasonable general model of computation is equivalent in power to a Turing machine', 'Lambda calculus is more powerful than Turing machines', 'Church and Turing independently solved the same problem'], ans: 1, exp: 'Church-Turing thesis: any reasonable, general model of computation can compute exactly the same functions as a Turing machine. Lambda calculus and Turing machines are two such equivalent models.' },
+    { q: 'Which TWO languages are direct ancestors of Racket?', opts: ['FORTRAN and C', 'Lisp and Scheme', 'COBOL and Java', 'Python and Haskell'], ans: 1, exp: 'Racket lineage: Lisp (McCarthy, 1958) -> Scheme (Sussman & Steele, 1975) -> Racket. McCarthy was inspired by Church\'s lambda calculus when designing Lisp.' },
+    { q: "Godel's incompleteness theorems proved:", opts: ['Math can prove any true statement given enough time', 'Any consistent formal system powerful enough for arithmetic cannot prove all true statements within it', 'Turing machines cannot solve all problems', 'Lambda calculus is equivalent to Turing machines'], ans: 1, exp: 'Godel (1931): any sufficiently powerful, consistent formal system is INCOMPLETE — there exist true statements it cannot prove. Or, if it can prove everything, it proves contradictions. This is undecidable within the system itself.' }
+  ]
+};
+
+// ── RENDER ENGINE ──────────────────────────────────────────────────────────
+function renderLesson(id) {
+  var L = LESSONS[id];
+  if (!L) return;
+  var html = '<button class="back-btn" onclick="goScreen(\'home\')">← Dashboard</button>';
+  html += '<div class="lesson-wrap"><div class="lesson-main">';
+  html += '<div class="ls-heading">' + L.title + '</div>';
+  html += '<div class="ls-intro">' + L.intro + '</div>';
+  html += '<div class="sec-label">Core Concepts</div>';
+  L.concepts.forEach(function(c) {
+    html += '<div class="concept-card"><div class="cc-title">' + c.title + '</div>';
+    html += '<div class="code-block">' + c.body + '</div></div>';
+  });
+  if (L.examples && L.examples.length > 0) {
+    html += '<div class="sec-label">Worked Examples — step through each one</div>';
+    L.examples.forEach(function(ex, ei) {
+      html += renderExample(ex, id + 'e' + ei);
+    });
+  }
+  html += '</div><div class="lesson-side">';
+  if (L.mcq && L.mcq.length > 0) {
+    html += '<div class="sec-label">Practice Questions (' + L.mcq.length + ')</div>';
+    html += buildMCQ(L.mcq, id);
+  }
+  html += '</div></div>';
+  document.getElementById('lesson-body').innerHTML = html;
+  if (L.examples) {
+    L.examples.forEach(function(ex, ei) { exSteps[id + 'e' + ei] = 0; });
+  }
+}
+
+function renderExample(ex, eid) {
+  var n = ex.steps.length;
+  var stepsHtml = ex.steps.map(function(s, i) {
+    return '<div class="ex-step' + (i === 0 ? ' visible' : '') + '" id="' + eid + 's' + i + '">' +
+      '<div class="ex-math">' + s.math + '</div>' +
+      '<div class="ex-explain">' + s.explain + '</div></div>';
+  }).join('');
+  var dots = ex.steps.map(function(_, i) {
+    return '<div class="ex-dot' + (i === 0 ? ' active' : '') + '" id="' + eid + 'd' + i + '" onclick="gotoStep(\'' + eid + '\',' + i + ',' + n + ')"></div>';
+  }).join('');
+  return '<div class="example-box">' +
+    '<div class="ex-header"><span class="ex-title">' + ex.title + '</span>' +
+    '<div class="ex-controls"><span class="ex-ctr" id="' + eid + 'c">1/' + n + '</span>' +
+    '<button class="ex-btn" id="' + eid + 'p" onclick="stepEx(\'' + eid + '\',-1,' + n + ')" disabled>&#9664;</button>' +
+    '<button class="ex-btn" id="' + eid + 'n" onclick="stepEx(\'' + eid + '\',1,' + n + ')">&#9654;</button>' +
+    '</div></div><div class="ex-body">' + stepsHtml + '</div>' +
+    '<div class="ex-progress">' + dots + '</div></div>';
+}
+
+function stepEx(eid, dir, n) {
+  var cur = exSteps[eid] || 0;
+  gotoStep(eid, Math.max(0, Math.min(n - 1, cur + dir)), n);
+}
+
+function gotoStep(eid, next, n) {
+  var cur = exSteps[eid] || 0;
+  var cs = document.getElementById(eid + 's' + cur);
+  var ns = document.getElementById(eid + 's' + next);
+  var cd = document.getElementById(eid + 'd' + cur);
+  var nd = document.getElementById(eid + 'd' + next);
+  if (cs) cs.classList.remove('visible');
+  if (cd) { cd.classList.remove('active'); if (cur < next) cd.classList.add('done'); }
+  if (ns) ns.classList.add('visible');
+  if (nd) nd.classList.add('active');
+  var ctr = document.getElementById(eid + 'c');
+  var pb = document.getElementById(eid + 'p');
+  var nb = document.getElementById(eid + 'n');
+  if (ctr) ctr.textContent = (next + 1) + '/' + n;
+  if (pb) pb.disabled = next === 0;
+  if (nb) nb.disabled = next === n - 1;
+  exSteps[eid] = next;
+}
+
+function buildMCQ(qs, lid) {
+  var tabs = qs.map(function(_, i) {
+    return '<div class="qtab' + (i === 0 ? ' active' : '') + '" id="qt' + lid + i + '" onclick="switchQ(\'' + lid + '\',' + i + ',' + qs.length + ')">Q' + (i + 1) + '</div>';
+  }).join('');
+  var panes = qs.map(function(q, i) {
+    var opts = q.opts.map(function(o, oi) {
+      return '<button class="opt" id="qo' + lid + i + '_' + oi + '" onclick="answerQ(\'' + lid + '\',' + i + ',' + oi + ',' + q.ans + ',' + qs.length + ')">' + o + '</button>';
+    }).join('');
+    return '<div class="quiz-pane' + (i === 0 ? ' active' : '') + '" id="qp' + lid + i + '">' +
+      '<div class="q-num">Question ' + (i + 1) + ' of ' + qs.length + '</div>' +
+      '<div class="q-text">' + q.q + '</div>' +
+      '<div class="options">' + opts + '</div>' +
+      '<div class="feedback" id="qf' + lid + i + '"></div>' +
+      '<div class="q-nav">' +
+      '<button class="q-nav-btn" onclick="switchQ(\'' + lid + '\',' + (i - 1) + ',' + qs.length + ')"' + (i === 0 ? ' disabled' : '') + '>&#8592; Prev</button>' +
+      '<button class="q-nav-btn" onclick="switchQ(\'' + lid + '\',' + (i + 1) + ',' + qs.length + ')"' + (i === qs.length - 1 ? ' disabled' : '') + '>Next &#8594;</button>' +
+      '</div></div>';
+  }).join('');
+  return '<div class="quiz-panel"><div class="quiz-tabs">' + tabs + '</div>' + panes + '</div>';
+}
+
+function switchQ(lid, i, n) {
+  if (i < 0 || i >= n) return;
+  for (var j = 0; j < n; j++) {
+    var t = document.getElementById('qt' + lid + j);
+    var p = document.getElementById('qp' + lid + j);
+    if (t) t.classList.toggle('active', j === i);
+    if (p) p.classList.toggle('active', j === i);
+  }
+}
+
+function answerQ(lid, qi, chosen, correct, total) {
+  var key = lid + qi;
+  if (answered[key]) return;
+  answered[key] = true;
+  var qs = LESSONS[lid].mcq;
+  for (var i = 0; i < qs[qi].opts.length; i++) {
+    var btn = document.getElementById('qo' + lid + qi + '_' + i);
+    if (btn) {
+      btn.disabled = true;
+      if (i === correct) btn.classList.add('correct');
+      else if (i === chosen) btn.classList.add('wrong');
+    }
+  }
+  var fb = document.getElementById('qf' + lid + qi);
+  if (fb) {
+    if (chosen === correct) {
+      fb.innerHTML = '&#10003; Correct! ' + qs[qi].exp;
+      fb.className = 'feedback show ok';
+      addXP(10);
+    } else {
+      fb.innerHTML = '&#10007; Not quite. ' + qs[qi].exp;
+      fb.className = 'feedback show no';
+      addXP(2);
+    }
+  }
+  var done = 0;
+  for (var j = 0; j < total; j++) { if (answered[lid + j]) done++; }
+  var pct = Math.round((done / total) * 100);
+  var bar = document.getElementById('bar-' + lid);
+  if (bar) bar.style.width = pct + '%';
+  var dot = document.getElementById('nd-' + lid);
+  if (dot) { dot.classList.remove('done', 'going'); dot.classList.add(pct >= 100 ? 'done' : 'going'); }
+}
+
+// ── EXAM ───────────────────────────────────────────────────────────────────
+var EXAM = [
+  { topic: 'Lambda / Beta-Reduction', q: 'Evaluate step by step:\n\n((lambda (x y) (+ (* x x) (* y y))) 3 4)', ans: 'Step 1: beta-reduce — substitute x=3, y=4 into body\n(+ (* 3 3) (* 4 4))\n\nStep 2: evaluate (* 3 3)\n(+ 9 (* 4 4))\n\nStep 3: evaluate (* 4 4)\n(+ 9 16)\n\nStep 4: evaluate +\n25\n\nAnswer: 25\n\nThis computes 3^2 + 4^2 = 9 + 16 = 25 (Pythagorean!)' },
+  { topic: 'Abstract List Functions', q: "Without explicit recursion, write an expression that takes a list of numbers and returns the sum of squares of all ODD numbers.\n\n(check-expect (your-expr '(1 2 3 4 5)) 35)", ans: "(foldr + 0 (map sqr (filter odd? lst)))\n\nTrace on '(1 2 3 4 5):\n1. (filter odd? '(1 2 3 4 5))  =>  '(1 3 5)\n2. (map sqr '(1 3 5))          =>  '(1 9 25)\n3. (foldr + 0 '(1 9 25))       =>  35  checkmark\n\nAlternative: (foldr + 0 (map sqr (filter odd? lst)))" },
+  { topic: 'BST', q: 'Write bst-insert: Nat BST -> BST that inserts a number into a BST, maintaining the ordering property. Assume no duplicates.', ans: '(define (bst-insert n bst)\n  (cond [(empty? bst) (mk-node n empty empty)]  ; insert here\n        [(= (get-label bst) n) bst]             ; duplicate, no change\n        [(> (get-label bst) n)                  ; n is smaller: go LEFT\n         (mk-node (get-label bst)\n                  (bst-insert n (get-left bst))\n                  (get-right bst))]\n        [else                                    ; n is larger: go RIGHT\n         (mk-node (get-label bst)\n                  (get-left bst)\n                  (bst-insert n (get-right bst)))]))\n\nTest: (bst-insert 4 example-bst) where example-bst has root 5\n=> 4 < 5, go left (to node 1)\n=> 4 > 1, go right (to empty)\n=> insert 4 as right child of 1' },
+  { topic: 'Local', q: 'Rewrite this function using local to avoid computing (distance p center) more than once:\n\n(define (classify p center radius)\n  (cond [(< (distance p center) (* 0.5 radius)) (quote inner)]\n        [(< (distance p center) radius) (quote middle)]\n        [else (quote outer)]))', ans: "(define (classify p center radius)\n  (local [(define d (distance p center))]\n    (cond [(< d (* 0.5 radius)) 'inner]\n          [(< d radius) 'middle]\n          [else 'outer])))\n\n;; Benefit: (distance p center) was computed up to 2 times.\n;; Now it is computed exactly ONCE and stored in d.\n;; This is the efficiency benefit of local." },
+  { topic: 'Currying', q: 'Write the function uncurry in Racket. Then trace: ((uncurry (curry *)) 4 5)', ans: '(define (uncurry f)\n  (lambda (x y) ((f x) y)))\n\nTrace: ((uncurry (curry *)) 4 5)\n\nStep 1: (uncurry (curry *))\n= (lambda (x y) (((curry *) x) y))\n\nStep 2: ((lambda (x y) (((curry *) x) y)) 4 5)\n= (((curry *) 4) 5)    [x=4, y=5]\n\nStep 3: (curry *) = (lambda (x) (lambda (y) (* x y)))\n((curry *) 4) = (lambda (y) (* 4 y))\n((lambda (y) (* 4 y)) 5) = (* 4 5) = 20\n\nAnswer: 20' },
+  { topic: 'General Trees (NTree)', q: 'Write nt-depth: NTree -> Nat that computes the maximum depth (number of levels) of an NTree. A single number has depth 1.', ans: '(define (nt-depth nt)\n  (cond [(number? nt) 1]              ; leaf: depth = 1\n        [(empty? (rest nt))            ; single child\n         (+ 1 (nt-depth (first nt)))]\n        [else                          ; multiple children\n         (+ 1 (max (nt-depth (first nt))\n                   (nt-depth (rest nt))))]))\n\n;; Wait — (rest nt) is a LIST of NTrees, not an NTree.\n;; We need the MAX depth among all children:\n(define (nt-depth nt)\n  (cond [(number? nt) 1]\n        [else (+ 1 (apply max (map nt-depth nt)))]))\n\n;; Simpler! For an NTree as a list (node children...):\n;; depth = 1 + max depth among all children\n;; For a leaf (number): depth = 1' },
+  { topic: 'foldr', q: 'Implement my-length using foldr — count the number of elements in a list.\n\n(check-expect (my-length (list 1 2 3 4)) 4)', ans: '(define (my-length lst)\n  (foldr (lambda (x acc) (+ 1 acc)) 0 lst))\n\nExplanation:\n- base case: 0 (empty list has 0 elements)\n- combining fn: for each element x, add 1 to acc\n  (we ignore x\'s value — we only care it EXISTS)\n\nTrace on (list 1 2 3):\n(foldr ... 0 (1 2 3))\n= (lambda 1 (foldr ... 0 (2 3)))\n= (+ 1 (+ 1 (+ 1 0)))\n= (+ 1 (+ 1 1))\n= (+ 1 2) = 3  checkmark' },
+  { topic: 'Accumulator', q: 'Write flatten: (listof Any) -> (listof Any) using an accumulator that flattens one level of nesting.\n\n(flatten (list (list 1 2) (list 3 4) 5)) => (list 1 2 3 4 5)', ans: '(define (flatten lst)\n  (local\n    [(define (flat/acc lst acc)\n       (cond [(empty? lst) (reverse acc)]\n             [(cons? (first lst))\n              (flat/acc (rest lst)\n                        (append (reverse (first lst)) acc))]\n             [else\n              (flat/acc (rest lst)\n                        (cons (first lst) acc))]))]\n    (flat/acc lst empty)))\n\n;; Alternative without accumulator using foldr:\n(define (flatten lst)\n  (foldr (lambda (x acc)\n           (cond [(cons? x) (append x acc)]\n                 [else (cons x acc)]))\n         empty lst))\n\n;; The foldr version is cleaner for this problem.' },
+  { topic: 'Graphs', q: "Trace find-path on this graph:\n(define G '((S (A B)) (A (C)) (B (C)) (C (T)) (T ())))\n\n(find-path 'S 'T G)\n\nWhat path is returned? Show the full trace.", ans: "(find-path 'S 'T G):\n  S != T. neighbours of S = '(A B)\n  Try (find-path 'A 'T G):\n    A != T. neighbours of A = '(C)\n    Try (find-path 'C 'T G):\n      C != T. neighbours of C = '(T)\n      Try (find-path 'T 'T G):\n        T = T! Return '(T)  SUCCESS\n      (find-path 'C 'T) returns (cons 'C '(T)) = '(C T)\n    (find-path 'A 'T) returns (cons 'A '(C T)) = '(A C T)\n  (find-path 'S 'T) returns (cons 'S '(A C T)) = '(S A C T)\n\nAnswer: '(S A C T)\n\nNote: B was never explored because A succeeded first." },
+  { topic: 'History', q: 'Match each person to their primary contribution to computer science:\n(a) Proved the halting problem undecidable\n(b) Invented the lambda calculus\n(c) Created the Lisp programming language\n(d) Often called the first computer programmer\n(e) The word "algorithm" derives from their name\n(f) COBOL contributions\n(g) Incompleteness theorems', ans: '(a) Alan Turing        -> halting problem undecidable\n(b) Alonzo Church      -> lambda calculus\n(c) John McCarthy      -> Lisp (1958)\n(d) Ada Lovelace       -> first programmer (Babbage engine)\n(e) Al-Khwarizmi       -> word "algorithm"\n(f) Grace Hopper       -> COBOL and early compilers\n(g) Kurt Godel         -> incompleteness theorems\n\nBONUS facts:\n- Turing studied under Church at Princeton\n- McCarthy was inspired by Church\'s lambda calculus for Lisp\n- Lisp -> Scheme -> Racket (your language lineage)\n- Church-Turing thesis: all reasonable models of computation are equivalent' },
+  { topic: 'Mutual Recursion', q: 'Write the two mutually recursive functions my-evens and my-odds:\n- my-evens: returns elements at even INDICES (0, 2, 4, ...)\n- my-odds: returns elements at odd INDICES (1, 3, 5, ...)\n\n(my-evens (list a b c d)) => (list a c)\n(my-odds  (list a b c d)) => (list b d)', ans: "(define (my-evens lst)\n  (cond [(empty? lst) empty]\n        [else (cons (first lst)        ; KEEP first element (index 0)\n                    (my-odds (rest lst)))]))\n;; my-evens: keep the first, then my-odds handles rest\n\n(define (my-odds lst)\n  (cond [(empty? lst) empty]\n        [else (my-evens (rest lst))]))  ; SKIP first element\n;; my-odds: skip the first, then my-evens handles rest\n\nTrace: (my-evens '(a b c d))\n=> (cons 'a (my-odds '(b c d)))\n=> (cons 'a (my-evens '(c d)))\n=> (cons 'a (cons 'c (my-odds '(d))))\n=> (cons 'a (cons 'c (my-evens '())))\n=> (cons 'a (cons 'c empty))\n=> '(a c)" },
+  { topic: 'compose + lambda', q: 'Without using define for a helper function, write an expression (using compose and/or lambda) that:\n- Takes a number\n- Doubles it\n- Then adds 1\n- Then checks if the result is even\n\nTest: applied to 4 should give true (4*2=8, 8+1=9, 9 is not even... wait, recalculate)', ans: "(compose even? add1 (lambda (x) (* x 2)))\n\nWait -- compose only takes 2 arguments in CS135.\nUse nested compose:\n(compose even? (compose add1 (lambda (x) (* x 2))))\n\nOr just a lambda:\n(lambda (x) (even? (+ (* x 2) 1)))\n\nTrace on 4:\n(* 4 2) = 8\n(+ 8 1) = 9\n(even? 9) = false\n\nTrace on 5:\n(* 5 2) = 10\n(+ 10 1) = 11\n(even? 11) = false\n\nNote: doubling and adding 1 always gives an odd number!\n(even? (2x+1)) is ALWAYS false for integer x.\nSo this function always returns false." }
+];
+
+var examCur = 0;
+var examSeen = {};
+
+function buildExam() {
+  examCur = 0;
+  examSeen = {};
+  renderExamIntro();
+}
+
+function renderExamIntro() {
+  document.getElementById('exam-body').innerHTML =
+    '<div class="exam-wrap">' +
+    '<div class="ls-heading">Practice Final Exam</div>' +
+    '<div class="exam-intro">' +
+    '<p>This exam has <strong>' + EXAM.length + ' questions</strong> covering every post-midterm topic. All questions are written/code-writing style — exactly like the real final.</p>' +
+    '<p>Instructions: read each question, write your answer in the text area (even roughly), THEN reveal the solution. The struggle is where learning happens. Do not skip to answers.</p>' +
+    '<p style="color:var(--amber);font-weight:500">Work through every question. If you get stuck, reveal the answer, study it, then try to reproduce it from scratch.</p>' +
+    '</div>' +
+    '<button class="start-btn" onclick="startExam()">Start Practice Exam</button></div>';
+}
+
+function startExam() { renderExamQ(0); }
+
+function renderExamQ(i) {
+  examCur = i;
+  if (i >= EXAM.length) { renderExamDone(); return; }
+  var q = EXAM[i];
+  var rid = 'er' + i;
+  document.getElementById('exam-body').innerHTML =
+    '<div class="exam-wrap">' +
+    '<div class="exam-q-num">Question ' + (i + 1) + ' of ' + EXAM.length + ' &nbsp;|&nbsp; Topic: ' + q.topic + '</div>' +
+    '<div class="exam-q-text">' + q.q + '</div>' +
+    '<textarea class="written-area" placeholder="Write your answer or code here before revealing the solution..."></textarea>' +
+    '<button class="reveal-btn" onclick="revealExam(\'' + rid + '\',' + i + ')">Reveal Solution</button>' +
+    '<div class="ans-reveal" id="' + rid + '">' + q.ans + '</div>' +
+    '<div style="margin-top:16px;display:flex;gap:10px">' +
+    (i > 0 ? '<button class="q-nav-btn" onclick="renderExamQ(' + (i - 1) + ')">&#8592; Prev</button>' : '') +
+    '<button class="q-nav-btn" style="margin-left:auto" onclick="renderExamQ(' + (i + 1) + ')">' + (i === EXAM.length - 1 ? 'Finish &#8594;' : 'Next &#8594;') + '</button>' +
+    '</div></div>';
+}
+
+function revealExam(rid, i) {
+  var el = document.getElementById(rid);
+  if (el) el.classList.add('show');
+  if (!examSeen[i]) { examSeen[i] = true; addXP(15); }
+}
+
+function renderExamDone() {
+  var seen = Object.keys(examSeen).length;
+  document.getElementById('exam-body').innerHTML =
+    '<div class="exam-wrap">' +
+    '<div class="ls-heading">Exam Complete</div>' +
+    '<div class="exam-score">' + seen + '/' + EXAM.length + '</div>' +
+    '<div class="exam-score-sub">Questions attempted</div>' +
+    '<p style="margin-top:16px;font-size:13px;color:var(--text2);line-height:1.75">Go back through any question you were not confident on. Re-read the lesson, then try that question again from scratch — covering the solution. Repetition with retrieval is how this locks in.</p>' +
+    '<p style="margin-top:12px;font-size:13px;color:var(--green);font-weight:500">You have done the work. You know the patterns. Go get that 75.</p>' +
+    '<div style="display:flex;gap:10px;margin-top:18px">' +
+    '<button class="start-btn" onclick="buildExam()">Retake Exam</button>' +
+    '<button class="q-nav-btn" onclick="goScreen(\'home\')">Dashboard</button></div></div>';
+}
+
+goScreen('home');
+</script>
+</body>
+</html>
